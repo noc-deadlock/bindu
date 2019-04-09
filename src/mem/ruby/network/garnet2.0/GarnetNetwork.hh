@@ -97,6 +97,7 @@ class GarnetNetwork : public Network
                           PortDirection src_outport_dirn,
                           PortDirection dest_inport_dirn);
 
+    bool functionalRead(Packet * pkt);
     //! Function for performing a functional write. The return value
     //! indicates the number of messages that were written.
     uint32_t functionalWrite(Packet *pkt);

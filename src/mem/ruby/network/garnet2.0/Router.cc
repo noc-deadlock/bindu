@@ -187,6 +187,12 @@ Router::getPortDirectionName(PortDirection direction)
     return direction;
 }
 
+bool
+Router::functionalRead(Packet *pkt)
+{
+    return false;
+}
+
 void
 Router::regStats()
 {

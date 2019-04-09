@@ -439,6 +439,24 @@ GarnetNetworkParams::create()
     return new GarnetNetwork(this);
 }
 
+/*
+ * The Garnet Network has an array of routers. These routers have buffers
+ * that need to be accessed for functional reads and writes. Also the links
+ * between different routers have buffers that need to be accessed.
+*/
+bool
+GarnetNetwork::functionalRead(Packet * pkt)
+{
+    for(unsigned int i = 0; i < m_routers.size(); i++) {
+        if (m_routers[i]->functionalRead(pkt)) {
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
 uint32_t
 GarnetNetwork::functionalWrite(Packet *pkt)
 {
