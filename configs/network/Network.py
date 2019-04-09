@@ -76,7 +76,12 @@ def define_options(parser):
     parser.add_option("--garnet-deadlock-threshold", action="store",
                       type="int", default=50000,
                       help="network-level deadlock threshold.")
-
+    parser.add_option("--enable-bn", action="store", type="int",
+                    default=0,
+                    help="to enable brownian_network")
+    parser.add_option("--num-bubble", action="store", type="int",
+                    default=0,
+                    help="number of brownian-bubbles in the network")
 
 def create_network(options, ruby):
 
@@ -123,3 +128,8 @@ def init_network(options, network, InterfaceClass):
         assert(options.network == "garnet2.0")
         network.enable_fault_model = True
         network.fault_model = FaultModel()
+
+    if options.enable_bn == 1:
+        assert(options.network == "garnet2.0")
+        network.enable_bn = options.enable_bn
+        network.num_bubble = options.num_bubble

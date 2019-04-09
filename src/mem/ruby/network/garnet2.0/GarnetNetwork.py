@@ -48,6 +48,10 @@ class GarnetNetwork(RubyNetwork):
     fault_model = Param.FaultModel(NULL, "network fault model");
     garnet_deadlock_threshold = Param.UInt32(50000,
                               "network-level deadlock threshold")
+    enable_bn = Param.UInt32(Parent.enable_bn,
+                            "to enable brownian network scheme in the network")
+    num_bubble = Param.UInt32(Parent.num_bubble,
+                            "number of brownian bubbles present in the network")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

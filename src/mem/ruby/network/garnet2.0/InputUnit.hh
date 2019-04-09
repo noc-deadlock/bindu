@@ -55,6 +55,7 @@ class InputUnit : public Consumer
     void print(std::ostream& out) const {};
 
     inline PortDirection get_direction() { return m_direction; }
+    inline int get_id() { return m_id; }
 
     inline void
     set_vc_idle(int vc, Cycles curTime)

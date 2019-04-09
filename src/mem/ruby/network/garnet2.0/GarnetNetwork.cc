@@ -45,6 +45,7 @@
 #include "mem/ruby/network/garnet2.0/NetworkInterface.hh"
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
+#include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/system/RubySystem.hh"
 
 using namespace std;
@@ -65,6 +66,12 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     m_buffers_per_data_vc = p->buffers_per_data_vc;
     m_buffers_per_ctrl_vc = p->buffers_per_ctrl_vc;
     m_routing_algorithm = p->routing_algorithm;
+    m_enable_bn = p->enable_bn;
+    m_num_bubble = p->num_bubble;
+    cout << "m_enable_bn: " << m_enable_bn << endl;
+    cout << "m_num_bubble: " << m_num_bubble << endl;
+    bubble.reserve(m_num_bubble);
+    assert(0);
 
     m_enable_fault_model = p->enable_fault_model;
     if (m_enable_fault_model)
@@ -95,6 +102,24 @@ GarnetNetwork::GarnetNetwork(const Params *p)
         NetworkInterface *ni = safe_cast<NetworkInterface *>(*i);
         m_nis.push_back(ni);
         ni->init_net_ptr(this);
+    }
+
+    // initialize brownian bubbles here:
+    for (int k=0; k < m_num_bubble; k++) {
+        bubble.at(k).bubble_id = k;
+        bubble.at(k).router_id = k % (m_routers.size());
+        for (int inp_=0; inp_ < m_routers.at(bubble.at(k).router_id)->\
+                                get_inputUnit_ref().size(); inp_++) {
+            if (m_routers.at(bubble.at(k).router_id)->\
+                get_inputUnit_ref().at(inp_)->get_direction() != "Local") {
+                bubble.at(k).inport_dirn = m_routers.at(bubble.at(k).router_id)->\
+                                        get_inputUnit_ref().at(inp_)->get_direction();
+                bubble.at(k).inport_id = m_routers.at(bubble.at(k).router_id)->\
+                                        get_inputUnit_ref().at(inp_)->get_id();
+                break;
+            }
+
+        }
     }
 }
 

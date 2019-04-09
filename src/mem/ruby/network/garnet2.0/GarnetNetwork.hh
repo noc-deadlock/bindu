@@ -144,6 +144,18 @@ class GarnetNetwork : public Network
         m_total_hops += hops;
     }
 
+    uint32_t m_enable_bn;
+    uint32_t m_num_bubble;
+
+    struct brownian_bubble {
+        uint32_t bubble_id;
+        uint32_t router_id;
+        uint32_t inport_id;
+        PortDirection inport_dirn;
+    };
+
+    std::vector<brownian_bubble> bubble;
+
   protected:
     // Configuration
     int m_num_rows;
