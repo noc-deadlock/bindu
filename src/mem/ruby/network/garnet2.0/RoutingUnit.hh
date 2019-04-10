@@ -72,6 +72,14 @@ class RoutingUnit
                              int inport,
                              PortDirection inport_dirn);
 
+    const std::map<PortDirection, int>& get_inports_dirn2idx()   {
+        return m_inports_dirn2idx;
+    }
+    const std::map<int, PortDirection>& get_inports_idx2dirn()   {
+       return m_inports_idx2dirn;
+    }
+
+
   private:
     Router *m_router;
 

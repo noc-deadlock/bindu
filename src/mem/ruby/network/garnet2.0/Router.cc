@@ -75,6 +75,7 @@ Router::~Router()
 void
 Router::init()
 {
+    // cout << "print for Router::init() for router-id: " << m_id << endl;
     BasicRouter::init();
 
     m_sw_alloc->init();
@@ -86,6 +87,16 @@ Router::wakeup()
 {
     DPRINTF(RubyNetwork, "Router %d woke up\n", m_id);
 
+    // [my-understanding] the way gem5/m5 execute is; in first pass init()-functions
+    // are used to trasfer all the python configuration to C++ object serially and in
+    // second pass simulation starts.
+    // very fist router that gets called should initialize the brownian bubbles
+    // after that no-one should touch it.
+    if (m_network_ptr->m_bubble_init == false) {
+        // this is the very first wake-up of the router in the
+        // whole network.
+        m_network_ptr->init_brownian_bubbles();
+    }
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
         m_input_unit[inport]->wakeup();

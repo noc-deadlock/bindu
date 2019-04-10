@@ -115,6 +115,8 @@ def init_network(options, network, InterfaceClass):
         network.ni_flit_size = options.link_width_bits / 8
         network.routing_algorithm = options.routing_algorithm
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
+        network.enable_bn = options.enable_bn
+        network.num_bubble = options.num_bubble
 
     if options.network == "simple":
         network.setup_buffers()
@@ -131,5 +133,3 @@ def init_network(options, network, InterfaceClass):
 
     if options.enable_bn == 1:
         assert(options.network == "garnet2.0")
-        network.enable_bn = options.enable_bn
-        network.num_bubble = options.num_bubble

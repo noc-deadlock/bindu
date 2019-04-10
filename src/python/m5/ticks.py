@@ -76,10 +76,10 @@ def fromSeconds(value):
     value *= _m5.core.getClockFrequency()
 
     int_value = int(round(value))
-    err = (value - int_value) / value
-    if err > frequency_tolerance:
-        warn("rounding error > tolerance\n    %f rounded to %d", value,
-            int_value)
+    # err = (value - int_value) / value
+    # if err > frequency_tolerance:
+        # warn("rounding error > tolerance\n    %f rounded to %d", value,
+        #     int_value)
     return int_value
 
 __all__ = [ 'setGlobalFrequency', 'fixGlobalFrequency', 'fromSeconds',

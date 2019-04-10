@@ -88,6 +88,7 @@ class Router : public BasicRouter, public Consumer
     GarnetNetwork* get_net_ptr()                    { return m_network_ptr; }
     std::vector<InputUnit *>& get_inputUnit_ref()   { return m_input_unit; }
     std::vector<OutputUnit *>& get_outputUnit_ref() { return m_output_unit; }
+    RoutingUnit* get_routingUnit_ref() {   return m_routing_unit; }
     PortDirection getOutportDirection(int outport);
     PortDirection getInportDirection(int inport);
 

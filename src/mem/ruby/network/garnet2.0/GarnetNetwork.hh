@@ -144,12 +144,17 @@ class GarnetNetwork : public Network
         m_total_hops += hops;
     }
 
+    void print_brownian_bubbles();
+    void init_brownian_bubbles();
+
     uint32_t m_enable_bn;
     uint32_t m_num_bubble;
+    bool m_bubble_init;
 
     struct brownian_bubble {
         uint32_t bubble_id;
         uint32_t router_id;
+        // uint32_t vc_id; // one bb per vnet, can be identified from vc_id
         uint32_t inport_id;
         PortDirection inport_dirn;
     };
