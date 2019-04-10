@@ -149,16 +149,26 @@ class InputUnit : public Consumer
     uint32_t functionalWrite(Packet *pkt);
     void resetStats();
 
+    void set_src_router(int src) {
+        m_src_router = src;
+    }
+
+    int get_src_router() {
+        return m_src_router;
+    }
+
   private:
     int m_id;
     PortDirection m_direction;
     int m_num_vcs;
     int m_vc_per_vnet;
+    int m_src_router;
 
     Router *m_router;
     NetworkLink *m_in_link;
     CreditLink *m_credit_link;
     flitBuffer *creditQueue;
+
 
     // Input Virtual channels
     std::vector<VirtualChannel *> m_vcs;

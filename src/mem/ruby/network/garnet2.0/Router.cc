@@ -92,10 +92,12 @@ Router::wakeup()
     // second pass simulation starts.
     // very fist router that gets called should initialize the brownian bubbles
     // after that no-one should touch it.
-    if (m_network_ptr->m_bubble_init == false) {
-        // this is the very first wake-up of the router in the
-        // whole network.
-        m_network_ptr->init_brownian_bubbles();
+    if (m_network_ptr->m_enable_bn == 1) {
+        if (m_network_ptr->m_bubble_init == false) {
+            // this is the very first wake-up of the router in the
+            // whole network.
+            m_network_ptr->init_brownian_bubbles();
+        }
     }
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
@@ -126,6 +128,7 @@ Router::addInPort(PortDirection inport_dirn,
     int port_num = m_input_unit.size();
     InputUnit *input_unit = new InputUnit(port_num, inport_dirn, this);
 
+    input_unit->set_src_router(in_link->get_link_src());
     input_unit->set_in_link(in_link);
     input_unit->set_credit_link(credit_link);
     in_link->setLinkConsumer(this);
@@ -145,6 +148,7 @@ Router::addOutPort(PortDirection outport_dirn,
     int port_num = m_output_unit.size();
     OutputUnit *output_unit = new OutputUnit(port_num, outport_dirn, this);
 
+    output_unit->set_dest_router(out_link->get_link_dest());
     output_unit->set_out_link(out_link);
     output_unit->set_credit_link(credit_link);
     credit_link->setLinkConsumer(this);

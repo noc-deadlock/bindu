@@ -43,6 +43,8 @@ NetworkLink::NetworkLink(const Params *p)
       link_srcQueue(nullptr), m_link_utilized(0),
       m_vc_load(p->vcs_per_vnet * p->virt_nets)
 {
+    m_link_dest = -1;
+    m_link_src = -1;
 }
 
 NetworkLink::~NetworkLink()

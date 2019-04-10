@@ -72,10 +72,24 @@ class NetworkLink : public ClockedObject, public Consumer
     uint32_t functionalWrite(Packet *);
     void resetStats();
 
+    inline int get_link_src() {
+        return m_link_src;
+    }
+
+    inline int get_link_dest() {
+        return m_link_dest;
+    }
+    inline void set_link_src_dest(int src, int dest) {
+       m_link_src = src;
+       m_link_dest = dest;
+    }
+
   private:
     const int m_id;
     link_type m_type;
     const Cycles m_latency;
+    int m_link_src;
+    int m_link_dest;
 
     flitBuffer *linkBuffer;
     Consumer *link_consumer;

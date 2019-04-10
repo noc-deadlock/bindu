@@ -46,6 +46,7 @@
 #include "mem/ruby/network/garnet2.0/NetworkLink.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
+#include "mem/ruby/network/garnet2.0/OutputUnit.hh"
 #include "mem/ruby/network/garnet2.0/RoutingUnit.hh"
 #include "mem/ruby/system/RubySystem.hh"
 
@@ -158,10 +159,38 @@ GarnetNetwork::init_brownian_bubbles() {
     }
     // print out all the browninan_bubbles
     print_brownian_bubbles();
+    print_topology();
     m_bubble_init = true;
     assert(0);
 
 }
+
+void
+GarnetNetwork::print_topology() {
+
+    for (int k = 0; k < m_routers.size(); k++) {
+        cout << "  *************  " << endl;
+        cout << "router_id: " << m_routers[k]->get_id() << endl;
+        cout << "  -------------  " << endl;
+        /*
+        for(int inp=0; inp < m_routers[k]->\
+            get_inputUnit_ref().size(); inp++) {
+            InputUnit *inp_ = m_routers[k]->get_inputUnit_ref()[inp];
+            cout << "Input-Unit id: " << inp_->get_id() << endl;
+            cout << "Input-Unit direction: " << inp_->get_direction() << endl;
+            cout << "Input-Unit source-router id: " << inp_->get_src_router() << endl;
+        }
+        */
+        for(int out=0; out < m_routers[k]->\
+            get_outputUnit_ref().size(); out++) {
+            OutputUnit *out_ = m_routers[k]->get_outputUnit_ref()[out];
+            cout << "Output-Unit id: " << out_->get_id() << endl;
+            cout << "Output-Unit direction: " << out_->get_direction() << endl;
+            cout << "Output-Unit destination-router id: " << out_->get_dest_router() << endl;
+        }
+    }
+}
+
 
 void
 GarnetNetwork::print_brownian_bubbles() {
@@ -331,7 +360,7 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
     NetworkLink* net_link = garnet_link->m_network_link;
     net_link->setType(INT_);
     CreditLink* credit_link = garnet_link->m_credit_link;
-
+    net_link->set_link_src_dest(src, dest);
     m_networklinks.push_back(net_link);
     m_creditlinks.push_back(credit_link);
 

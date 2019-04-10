@@ -96,11 +96,24 @@ class OutputUnit : public Consumer
 
     uint32_t functionalWrite(Packet *pkt);
 
+    void set_dest_router(int dest) {
+        m_dest_router = dest;
+    }
+
+    int get_dest_router() {
+        return m_dest_router;
+    }
+
+
+    int get_id() { return m_id; }
+
   private:
     int m_id;
     PortDirection m_direction;
     int m_num_vcs;
     int m_vc_per_vnet;
+    int m_dest_router;
+
     Router *m_router;
     NetworkLink *m_out_link;
     CreditLink *m_credit_link;

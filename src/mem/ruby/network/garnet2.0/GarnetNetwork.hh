@@ -146,6 +146,7 @@ class GarnetNetwork : public Network
 
     void print_brownian_bubbles();
     void init_brownian_bubbles();
+    void print_topology();
 
     uint32_t m_enable_bn;
     uint32_t m_num_bubble;
