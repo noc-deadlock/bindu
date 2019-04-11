@@ -210,10 +210,11 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
         int router_id = bubble[id].router_id;
         for (int itr = 0; itr < m_routers[router_id]->get_inputUnit_ref().size();
                         itr++) {
-
-            int inputPort = bubble[id].inport_id + itr;
+            // Randomly choose input unit.
+            int inputPort =
+                (random()%m_routers[router_id]->get_inputUnit_ref().size());
             InputUnit* inpUnit = m_routers[router_id]->get_inputUnit_ref()[inputPort];
-            cout << "inpUnit->get_direction: " << inpUnit->get_direction() << endl;
+            // cout << "inpUnit->get_direction: " << inpUnit->get_direction() << endl;
             if (inpUnit->get_direction() == "Local")
                 continue;
             // only move bubble to a input unit which has non-empty vc-0;

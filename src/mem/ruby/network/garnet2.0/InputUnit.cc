@@ -105,6 +105,7 @@ InputUnit::wakeup()
             // All flits in this packet will use this output port
             // The output port field in the flit is updated after it wins SA
             grant_outport(vc, outport);
+            t_flit->set_outport(outport);
 
         } else {
             assert(m_vcs[vc]->get_state() == ACTIVE_);

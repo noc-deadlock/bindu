@@ -124,7 +124,10 @@ SwitchAllocator::arbitrate_inports()
                 // This flit is in SA stage
 
                 int  outport = m_input_unit[inport]->get_outport(invc);
+                outport =
+                        m_input_unit[inport]->peekTopFlit(invc)->get_outport();
                 int  outvc   = m_input_unit[inport]->get_outvc(invc);
+                outvc = -1;
 
                 // check if the flit in this InputVC is allowed to be sent
                 // send_allowed conditions described in that function.
@@ -212,6 +215,7 @@ SwitchAllocator::arbitrate_outports()
                 // correct outport.
                 // Note: post route compute in InputUnit,
                 // outport is updated in VC, but not in flit
+                assert(t_flit->get_outport() == outport);
                 t_flit->set_outport(outport);
 
                 // set outvc (i.e., invc for next hop) in flit

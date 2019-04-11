@@ -103,7 +103,7 @@ Router::wakeup()
     // If '--enable-bn' then move the bubble at periodic cycle.
     if (m_network_ptr->m_enable_bn == 1) {
         for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
-            m_network_ptr->move_intra_bubble(0);
+            m_network_ptr->move_intra_bubble(id);
         }
     }
 
