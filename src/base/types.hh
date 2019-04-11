@@ -115,6 +115,10 @@ class Cycles
     constexpr bool operator>(const Cycles& cc) const
     { return c > cc.c; }
 
+    /** Greater than equal to comparison used for >= Cycles(0). */
+    constexpr bool operator>=(const Cycles& cc) const
+    { return c >= cc.c; }
+
     constexpr Cycles operator +(const Cycles& b) const
     { return Cycles(c + b.c); }
 

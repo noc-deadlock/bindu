@@ -147,17 +147,28 @@ class GarnetNetwork : public Network
     void print_brownian_bubbles();
     void init_brownian_bubbles();
     void print_topology();
+    bool move_intra_bubble(int bubble_id);
+    bool move_inter_bubble(int bubble_id);
+
 
     uint32_t m_enable_bn;
     uint32_t m_num_bubble;
     bool m_bubble_init;
+    uint32_t m_intra_bubble_period;
+    uint32_t m_inter_bubble_period;
 
     struct brownian_bubble {
         uint32_t bubble_id;
         uint32_t router_id;
         // uint32_t vc_id; // one bb per vnet, can be identified from vc_id
         uint32_t inport_id;
+        uint32_t last_inport_id; // this is because bubble move in rr fashion
         PortDirection inport_dirn;
+        PortDirection last_inport_dirn;
+        // these variables are used to decide if bubble should move or not
+        // and what kind of movement is needed.
+        Cycles last_intra_movement_cycle;
+        Cycles last_inter_movement_cycle;
     };
 
     std::vector<brownian_bubble> bubble;

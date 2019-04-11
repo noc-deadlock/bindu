@@ -89,6 +89,16 @@ class VirtualChannel
 
     uint32_t functionalWrite(Packet *pkt);
 
+  bool
+  isEmpty()
+  {
+      // if size is 0 then sent true; false otherwise
+      if(m_input_buffer->getSize() == 0)
+          return true;
+      else
+          return false;
+  }
+
   private:
     int m_id;
     flitBuffer *m_input_buffer;

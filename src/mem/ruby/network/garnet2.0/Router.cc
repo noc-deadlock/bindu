@@ -99,6 +99,12 @@ Router::wakeup()
             m_network_ptr->init_brownian_bubbles();
         }
     }
+
+    // If '--enable-bn' then move the bubble at periodic cycle.
+    if (m_network_ptr->m_enable_bn == 1) {
+
+    }
+
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
         m_input_unit[inport]->wakeup();

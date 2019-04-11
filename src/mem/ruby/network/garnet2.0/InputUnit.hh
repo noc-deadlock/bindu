@@ -148,13 +148,17 @@ class InputUnit : public Consumer
 
     uint32_t functionalWrite(Packet *pkt);
     void resetStats();
-
+    bool vc_isEmpty(int vcId) { return m_vcs[vcId]->isEmpty(); }
     void set_src_router(int src) {
         m_src_router = src;
     }
 
     int get_src_router() {
         return m_src_router;
+    }
+
+    NetworkLink* get_network_link() {
+        return m_in_link;
     }
 
   private:
