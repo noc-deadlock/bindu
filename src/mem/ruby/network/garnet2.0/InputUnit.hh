@@ -149,6 +149,12 @@ class InputUnit : public Consumer
     uint32_t functionalWrite(Packet *pkt);
     void resetStats();
     bool vc_isEmpty(int vcId) { return m_vcs[vcId]->isEmpty(); }
+
+    inline void
+    insertFlit(int vc_id, flit *t_flit) {
+        m_vcs[vc_id]->insertFlit(t_flit);
+    }
+
     void set_src_router(int src) {
         m_src_router = src;
     }

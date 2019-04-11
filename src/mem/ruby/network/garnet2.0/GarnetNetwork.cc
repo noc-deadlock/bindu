@@ -148,14 +148,39 @@ GarnetNetwork::init_brownian_bubbles() {
         bubble.at(k).router_id = k % (m_routers.size());
         for (int inp_=0; inp_ < m_routers.at(bubble.at(k).router_id)->\
                                 get_inputUnit_ref().size(); inp_++) {
+            // Do the credit management
             if (m_routers.at(bubble.at(k).router_id)->\
                 get_inputUnit_ref().at(inp_)->get_direction() != "Local") {
                 bubble.at(k).inport_dirn = m_routers.at(bubble.at(k).router_id)->\
                                         get_inputUnit_ref().at(inp_)->get_direction();
-                bubble.at(k).last_inport_dirn = bubble.at(k).inport_dirn;
+                // bubble.at(k).last_inport_dirn = bubble.at(k).inport_dirn;
+                bubble.at(k).last_inport_dirn = "Unknown";
                 bubble.at(k).inport_id = m_routers.at(bubble.at(k).router_id)->\
                                         get_inputUnit_ref().at(inp_)->get_id();
-                bubble.at(k).last_inport_id = bubble.at(k).inport_id;
+                // bubble.at(k).last_inport_id = bubble.at(k).inport_id;
+                bubble.at(k).last_inport_id = -1;
+                //---------------- manage credits -----------------------//
+                int inputPort = bubble[k].inport_id;
+                int router_id = bubble[k].router_id;
+                InputUnit* inpUnit = m_routers[router_id]->\
+                                get_inputUnit_ref()[inputPort];
+                OutputUnit* upstream_op_ = NULL;
+                Router* upstream_router_ = m_routers[inpUnit->get_src_router()];
+                for( int ii=0; ii <= upstream_router_->get_outputUnit_ref().size();
+                                ii++ ) {
+                    if(upstream_router_->get_outputUnit_ref()[ii]->get_dest_router() ==\
+                        router_id) {
+                        upstream_op_ = upstream_router_->get_outputUnit_ref()[ii];
+                        break;
+                    }
+                }
+                assert( upstream_op_ != NULL );
+                upstream_op_->decrement_credit(0);
+                // set vc-state to be active.
+                upstream_op_->set_vc_state(ACTIVE_, 0, curCycle());
+                // set this input vc to be active...
+                inpUnit->set_vc_active(0, curCycle());
+                //--------------- Credit management ends ----------------//
                 assert(bubble.at(k).inport_id == m_routers[bubble[k].router_id]->\
                                                 get_routingUnit_ref()->\
                                                 get_inports_dirn2idx().at(bubble.at(k).inport_dirn));
@@ -170,7 +195,7 @@ GarnetNetwork::init_brownian_bubbles() {
     print_brownian_bubbles();
     print_topology();
     m_bubble_init = true;
-    assert(0);
+    // assert(0);
 
 }
 
@@ -186,8 +211,9 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
         for (int itr = 0; itr < m_routers[router_id]->get_inputUnit_ref().size();
                         itr++) {
 
-            int inputPort = bubble[id].inport_id++;
+            int inputPort = bubble[id].inport_id + itr;
             InputUnit* inpUnit = m_routers[router_id]->get_inputUnit_ref()[inputPort];
+            cout << "inpUnit->get_direction: " << inpUnit->get_direction() << endl;
             if (inpUnit->get_direction() == "Local")
                 continue;
             // only move bubble to a input unit which has non-empty vc-0;
@@ -200,9 +226,24 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                 if(upstream_router_->get_outputUnit_ref()[ii]->get_dest_router() ==\
                     router_id) {
                     upstream_op_ = upstream_router_->get_outputUnit_ref()[ii];
+                    break;
                 }
             }
             assert( upstream_op_ != NULL );
+            InputUnit* orig_inpUnit = m_routers[router_id]->\
+                            get_inputUnit_ref()[bubble[id].inport_id];
+            // original output unit
+            OutputUnit* orig_upstream_op_ = NULL;
+            Router* orig_upstream_router_ = m_routers[orig_inpUnit->get_src_router()];
+            for( int ii=0; ii <= orig_upstream_router_->get_outputUnit_ref().size();
+                            ii++ ) {
+                if(orig_upstream_router_->get_outputUnit_ref()[ii]->get_dest_router() ==\
+                    router_id) {
+                    orig_upstream_op_ = orig_upstream_router_->get_outputUnit_ref()[ii];
+                    break;
+                }
+            }
+            assert(orig_upstream_op_ != NULL);
             if ( (inpUnit->vc_isEmpty(0) == true) &&
                 (upstream_op_->is_vc_idle(0, curCycle()) == false)) {
                 // this means that the flit is on the link.. or going to be
@@ -221,6 +262,12 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     upstream_op_->set_vc_state(ACTIVE_, 0, curCycle());
                     // set this input vc to be active...
                     inpUnit->set_vc_active(0, curCycle());
+                    // increment the credits where bubble was originally present
+
+                    orig_upstream_op_->increment_credit(0);
+                    orig_upstream_op_->set_vc_state(ACTIVE_, 0, curCycle());
+                    orig_inpUnit->set_vc_idle(0, curCycle());
+
                     // update the bubble and break
                     bubble[id].last_inport_id = bubble[id].inport_id;
                     bubble[id].last_inport_dirn = bubble[id].inport_dirn;
@@ -231,10 +278,28 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     moved_ = true;
                     break;
                 }
-
+                //exchange with a packet.. no credit management is needed.
+                else if ( (inpUnit->vc_isEmpty(0) == false) &&
+                        (upstream_op_->is_vc_idle(0, curCycle()) == false) ) {
+                    flit* t_flit = inpUnit->getTopFlit(0);
+                    // insert the flit at the location pointed out by the bubble
+                    orig_inpUnit->insertFlit(0, t_flit);
+                    // no credit management needed.
+                    // update the bubble and break
+                    bubble[id].last_inport_id = bubble[id].inport_id;
+                    bubble[id].last_inport_dirn = bubble[id].inport_dirn;
+                    bubble[id].inport_id = inpUnit->get_id();
+                    bubble[id].inport_dirn = inpUnit->get_direction();
+                    assert(bubble[id].inport_dirn != "Local");
+                    bubble[id].last_intra_movement_cycle = curCycle();
+                    moved_ = true;
+                    break;
+                }
+                else {
+                    assert(0);
+                }
             }
         }
-
     }
     return moved_;
 }
