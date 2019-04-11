@@ -217,6 +217,20 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
             // cout << "inpUnit->get_direction: " << inpUnit->get_direction() << endl;
             if (inpUnit->get_direction() == "Local")
                 continue;
+
+            bool try_next = false;
+            // make sure this empty input port vc is not another bubble
+            // as there can be multiple bubble sitting within a router
+            // scan through all brownian-bubbles:
+            for (int bb=0; bb < bubble.size(); bb++) {
+                if ((id != bubble[bb].bubble_id) &&
+                    (bubble[bb].router_id == bubble[id].router_id) &&
+                    (bubble[bb].inport_id == inpUnit->get_id())) {
+                    try_next = true;
+                }
+            }
+            if (try_next)
+                continue;
             // only move bubble to a input unit which has non-empty vc-0;
             // only condition when you cannot SWAP is when vc-0 is empty and
             // up-stream router's output unit has no credit.
@@ -257,6 +271,7 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                 // exchange with an empty input port.
                 if( (inpUnit->vc_isEmpty(0) == true) &&
                     ( upstream_op_->is_vc_idle(0, curCycle()) == true) ) {
+
                     // decrement credit and update the bubble and break.
                     upstream_op_->decrement_credit(0);
                     // set vc-state to be active.
@@ -308,7 +323,8 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
 bool
 GarnetNetwork::move_inter_bubble(int bubble_id) {
     bool moved_ = false;
-
+    int id = bubble_id;
+    assert()
     return moved_;
 }
 
