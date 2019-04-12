@@ -157,6 +157,7 @@ class GarnetNetwork : public Network
     bool m_bubble_init;
     uint32_t m_intra_bubble_period;
     uint32_t m_inter_bubble_period;
+    Cycles last_inter_bubble_movement;
 
     struct brownian_bubble {
         uint32_t bubble_id;

@@ -109,8 +109,12 @@ Router::wakeup()
 
    // if '--enable-bn' then move the bubble across routers at periodic cycle.
    if (m_network_ptr->m_enable_bn == 1) {
-        for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
-            m_network_ptr->move_inter_bubble(id);
+        // Only one router would do it and will move bubble only once
+        if (m_network_ptr->last_inter_bubble_movement < curCycle()) {
+            for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
+                m_network_ptr->move_inter_bubble(id);
+            }
+            m_network_ptr->last_inter_bubble_movement = curCycle();
         }
    }
 

@@ -77,6 +77,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     bubble.resize(m_num_bubble);
     m_inter_bubble_period = 2;
     m_inter_bubble_period = 10;
+    last_inter_bubble_movement = Cycles(0);
     // these should be later configured using command-line.
     // for now hard-codding them
 
@@ -338,6 +339,7 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
     // you may exhange it with a critical bubble if it comes to that..
     // other wise there might be deadlock.. [ have not thought it through ]
     assert(curCycle() >= bubble[bubble_id].last_inter_movement_cycle);
+
     if ((curCycle() - bubble[bubble_id].last_inter_movement_cycle) >=\
             m_inter_bubble_period) {
         int nxt_router_id = move_next_router(bubble[bubble_id].router_id,
@@ -393,8 +395,20 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 // set this input vc (of the next router) to be active...
                 inpUnit->set_vc_active(0, curCycle());
                 // increment the credits where bubble was originally present
+                orig_upstream_op_->increment_credit(0);
+                orig_upstream_op_->set_vc_state(IDLE_, 0, curCycle());
+                orig_inpUnit->set_vc_idle(0, curCycle());
 
-
+                // update the bubble and break...
+                bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
+                bubble[bubble_id].last_inport_dirn = bubble[bubble_id].inport_dirn;
+                bubble[bubble_id].router_id = nxt_router_id;
+                bubble[bubble_id].inport_id = inpUnit->get_id();
+                bubble[bubble_id].inport_dirn = inpUnit->get_direction();
+                assert(bubble[bubble_id].inport_dirn != "Local");
+                bubble[bubble_id].last_inter_movement_cycle = curCycle();
+                moved_ = true;
+                break;
             }
 
             // Case II: if the vc-0 is empty and a brownian bubble as well.
