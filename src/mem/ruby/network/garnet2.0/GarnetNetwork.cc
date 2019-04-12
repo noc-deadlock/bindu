@@ -323,8 +323,8 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
 bool
 GarnetNetwork::move_inter_bubble(int bubble_id) {
     bool moved_ = false;
-    int id = bubble_id;
-    assert()
+    // int id = bubble_id;
+    // assert()
     return moved_;
 }
 
