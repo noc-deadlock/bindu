@@ -340,17 +340,42 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
     assert(curCycle() >= bubble[bubble_id].last_inter_movement_cycle);
     if ((curCycle() - bubble[bubble_id].last_inter_movement_cycle) >=\
             m_inter_bubble_period) {
-        int nxt_router = move_next_router(bubble[bubble_id].router_id,
+        int nxt_router_id = move_next_router(bubble[bubble_id].router_id,
                                             bubble_id);
+        Router* nxt_router = m_routers[nxt_router_id];
         // get the input unit of this router.
-        for (int itr=0; itr < m_routers[nxt_router]->get_inputUnit_ref().size();
+        for (int itr=0; itr < nxt_router->get_inputUnit_ref().size();
             itr++) {
             int inputPort = (random() %
-                m_routers[nxt_router]->get_inputUnit_ref().size());
-            InputUnit* inpUnit = m_routers[nxt_router]->get_inputUnit_ref()[inputPort];
+                nxt_router->get_inputUnit_ref().size());
+            // this 'inpUnit' is the input unit of the next router
+            InputUnit* inpUnit = nxt_router->get_inputUnit_ref()[inputPort];
             if ( inpUnit->get_direction() == "Local" )
                 continue;
+            // If control comes here then check for the three possible condition.
+            // Case I: if the vc-0 is empty and not a brownian bubble
+            // check if that input unit's upstream router has this vc as idle.
+            OutputUnit* upstream_op_ = NULL; // this 'upstream_op_' is output unit of
+                                            // upstream router of the next router
+            Router* upstream_nxt_router = m_routers[inpUnit->get_src_router()];
+            for (int ii=0; ii <= upstream_nxt_router->get_outputUnit_ref().size();
+                    ii++) {
+                if(upstream_nxt_router->get_outputUnit_ref()[ii]->get_dest_router()
+                    == nxt_router_id) {
+                    upstream_op_ = upstream_nxt_router->get_outputUnit_ref()[ii];
+                    break;
+                }
+            }
+            assert( upstream_op_ != NULL );
+            if ((inpUnit->vc_isEmpty(0) == true) &&
+                (upstream_op_->is_vc_idle(0, curCycle()) == true)) {
+                assert(0);
 
+            }
+
+            // Case II: if the vc-0 is empty and a brownian bubble as well.
+
+            // Case III: if vc-0 has a packet sitting.
         }
     }
     // select and input port from next router
