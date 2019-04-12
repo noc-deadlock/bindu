@@ -295,6 +295,12 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     assert(bubble[id].inport_dirn != "Local");
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
+                    // schedule wakeup for this router at next inter-bubble-period.
+                    if (curCycle() > Cycles(m_inter_bubble_period)) {
+                        m_routers[router_id]->\
+                        schedule_wakeup( Cycles(m_inter_bubble_period) - \
+                        Cycles( uint64_t(curCycle()) % m_inter_bubble_period));
+                    }
                     break;
                 }
                 //exchange with a packet.. no credit management is needed.
