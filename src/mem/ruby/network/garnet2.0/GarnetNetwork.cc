@@ -284,7 +284,7 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     // increment the credits where bubble was originally present
 
                     orig_upstream_op_->increment_credit(0);
-                    orig_upstream_op_->set_vc_state(ACTIVE_, 0, curCycle());
+                    orig_upstream_op_->set_vc_state(IDLE_, 0, curCycle());
                     orig_inpUnit->set_vc_idle(0, curCycle());
 
                     // update the bubble and break
@@ -367,9 +367,33 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 }
             }
             assert( upstream_op_ != NULL );
+            // Original input-unit/ output unit; where bubble is present.
+            ////////////////////////////////////////////////
+            InputUnit* orig_inpUnit = m_routers[bubble[bubble_id].router_id]->\
+                            get_inputUnit_ref()[bubble[bubble_id].inport_id];
+            // original output unit
+            OutputUnit* orig_upstream_op_ = NULL;
+            Router* orig_upstream_router_ = m_routers[orig_inpUnit->get_src_router()];
+            for( int ii=0; ii <= orig_upstream_router_->get_outputUnit_ref().size();
+                            ii++ ) {
+                if(orig_upstream_router_->get_outputUnit_ref()[ii]->get_dest_router() ==\
+                    bubble[bubble_id].router_id) {
+                    orig_upstream_op_ = orig_upstream_router_->get_outputUnit_ref()[ii];
+                    break;
+                }
+            }
+            assert(orig_upstream_op_ != NULL);
+            ////////////////////////////////////////////////
             if ((inpUnit->vc_isEmpty(0) == true) &&
                 (upstream_op_->is_vc_idle(0, curCycle()) == true)) {
-                assert(0);
+                // decrement credit and update the bubble and break
+                upstream_op_->decrement_credit(0);
+                // set vc-state to be active.
+                upstream_op_->set_vc_state(ACTIVE_, 0, curCycle());
+                // set this input vc (of the next router) to be active...
+                inpUnit->set_vc_active(0, curCycle());
+                // increment the credits where bubble was originally present
+
 
             }
 
