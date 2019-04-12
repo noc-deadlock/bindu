@@ -146,6 +146,9 @@ GarnetNetwork::init_brownian_bubbles() {
     for (int k=0; k < m_num_bubble; k++) {
         bubble.at(k).bubble_id = k;
         bubble.at(k).router_id = k % (m_routers.size());
+        // initializie the sense of movement to be increaseing for all the
+        // brownian-bubbles
+        bubble.at(k).sense_inc = true;
         for (int inp_=0; inp_ < m_routers.at(bubble.at(k).router_id)->\
                                 get_inputUnit_ref().size(); inp_++) {
             // Do the credit management
@@ -328,6 +331,69 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
     return moved_;
 }
 
+int
+GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
+    int next_router_id = -1;
+        // curr_router_id; // this will be router-id of the bubble
+    int mesh_row = m_num_rows; // this will be topology row
+    // bool sense_inc = true; // this will be member variable of bubble
+
+    if (curr_router_id == mesh_row*mesh_row - mesh_row)
+        bubble[bubble_id].sense_inc = false;
+    if (curr_router_id == 0)
+        bubble[bubble_id].sense_inc = true;
+
+    if (bubble[bubble_id].sense_inc) {
+
+        if ((curr_router_id/mesh_row) % 2 == 0) {
+            // this means this is an even mesh_row
+            // starting from 0.
+            if (curr_router_id%mesh_row == mesh_row-1) {
+
+                next_router_id = curr_router_id + mesh_row;
+            }
+            else
+                next_router_id = curr_router_id + 1;
+        }
+        else if ((curr_router_id/mesh_row) % 2 == 1) {
+            // this means this is an odd mesh_row
+            // starting from 0.
+            if (curr_router_id%mesh_row == 0) {
+                // cout << "next next_router_id: " << next_router_id << endl;
+                next_router_id = curr_router_id + mesh_row;
+            }
+            else
+                next_router_id = curr_router_id - 1;
+        }
+    }
+    else if (!bubble[bubble_id].sense_inc) {
+
+        if ((curr_router_id/mesh_row) % 2 == 0) {
+            // this means this is an even mesh_row
+            // starting from 0.
+            if (curr_router_id%mesh_row == 0) {
+
+                next_router_id = curr_router_id - mesh_row;
+            }
+            else
+                next_router_id = curr_router_id - 1;
+        }
+        else if ((curr_router_id/mesh_row) % 2 == 1) {
+            // this means this is an odd mesh_row
+            // starting from 0.
+            if (curr_router_id%mesh_row == mesh_row-1) {
+                // cout << "next next_router_id: " << next_router_id << endl;
+                next_router_id = curr_router_id - mesh_row;
+            }
+            else
+                next_router_id = curr_router_id + 1;
+        }
+    }
+    cout << "next next_router_id: " << next_router_id  << endl;
+    assert (next_router_id >= 0);
+    assert (next_router_id < m_routers.size());
+    return (next_router_id);
+}
 
 void
 GarnetNetwork::print_topology() {

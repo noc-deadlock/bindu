@@ -4,9 +4,9 @@ using namespace std;
 
 int main()
 {
-    int start = 12;
-    int mesh_row = 4;
-    bool sense_inc = true;
+    int start = 12; // this will be router-id of the bubble
+    int mesh_row = 4; // this will be topology row
+    bool sense_inc = true; // this will be member variable of bubble
     for (int i = 0; i < 100; i++) {
         if (start == mesh_row*mesh_row - mesh_row)
             sense_inc = false;

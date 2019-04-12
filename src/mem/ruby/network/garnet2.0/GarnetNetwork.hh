@@ -149,6 +149,7 @@ class GarnetNetwork : public Network
     void print_topology();
     bool move_intra_bubble(int bubble_id);
     bool move_inter_bubble(int bubble_id);
+    int move_next_router(int curr_router_id, int bubble_id );
 
 
     uint32_t m_enable_bn;
@@ -169,6 +170,7 @@ class GarnetNetwork : public Network
         // and what kind of movement is needed.
         Cycles last_intra_movement_cycle;
         Cycles last_inter_movement_cycle;
+        bool sense_inc; // dictates the sense of movement of bubbles
     };
 
     std::vector<brownian_bubble> bubble;
