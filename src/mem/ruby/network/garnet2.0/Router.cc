@@ -107,6 +107,13 @@ Router::wakeup()
         }
     }
 
+   // if '--enable-bn' then move the bubble across routers at periodic cycle.
+   if (m_network_ptr->m_enable_bn == 1) {
+        for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
+            m_network_ptr->move_inter_bubble(id);
+        }
+   }
+
     // check for incoming flits
     for (int inport = 0; inport < m_input_unit.size(); inport++) {
         m_input_unit[inport]->wakeup();

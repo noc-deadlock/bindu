@@ -334,6 +334,26 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
     bool moved_ = false;
     // int id = bubble_id;
     // assert()
+    // Todo: Fill this in.
+    // you may exhange it with a critical bubble if it comes to that..
+    // other wise there might be deadlock.. [ have not thought it through ]
+    assert(curCycle() >= bubble[bubble_id].last_inter_movement_cycle);
+    if ((curCycle() - bubble[bubble_id].last_inter_movement_cycle) >=\
+            m_inter_bubble_period) {
+        int nxt_router = move_next_router(bubble[bubble_id].router_id,
+                                            bubble_id);
+        // get the input unit of this router.
+        for (int itr=0; itr < m_routers[nxt_router]->get_inputUnit_ref().size();
+            itr++) {
+            int inputPort = (random() %
+                m_routers[nxt_router]->get_inputUnit_ref().size());
+            InputUnit* inpUnit = m_routers[nxt_router]->get_inputUnit_ref()[inputPort];
+            if ( inpUnit->get_direction() == "Local" )
+                continue;
+
+        }
+    }
+    // select and input port from next router
     return moved_;
 }
 
@@ -355,7 +375,6 @@ GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
             // this means this is an even mesh_row
             // starting from 0.
             if (curr_router_id%mesh_row == mesh_row-1) {
-
                 next_router_id = curr_router_id + mesh_row;
             }
             else
@@ -373,7 +392,6 @@ GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
         }
     }
     else if (!bubble[bubble_id].sense_inc) {
-
         if ((curr_router_id/mesh_row) % 2 == 0) {
             // this means this is an even mesh_row
             // starting from 0.
@@ -395,7 +413,8 @@ GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
                 next_router_id = curr_router_id + 1;
         }
     }
-    cout << "next next_router_id: " << next_router_id  << endl;
+    cout << "curr_router_id: " << curr_router_id << endl;
+    cout << "next_router_id: " << next_router_id  << endl;
     assert (next_router_id >= 0);
     assert (next_router_id < m_routers.size());
     return (next_router_id);
