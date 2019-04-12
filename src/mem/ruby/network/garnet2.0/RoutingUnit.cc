@@ -205,20 +205,20 @@ RoutingUnit::outportComputeXY(RouteInfo route,
 
     if (x_hops > 0) {
         if (x_dirn) {
-            assert(inport_dirn == "Local" || inport_dirn == "West");
+            // assert(inport_dirn == "Local" || inport_dirn == "West");
             outport_dirn = "East";
         } else {
-            assert(inport_dirn == "Local" || inport_dirn == "East");
+            // assert(inport_dirn == "Local" || inport_dirn == "East");
             outport_dirn = "West";
         }
     } else if (y_hops > 0) {
         if (y_dirn) {
             // "Local" or "South" or "West" or "East"
-            assert(inport_dirn != "North");
+            // assert(inport_dirn != "North");
             outport_dirn = "North";
         } else {
             // "Local" or "North" or "West" or "East"
-            assert(inport_dirn != "South");
+            // assert(inport_dirn != "South");
             outport_dirn = "South";
         }
     } else {
