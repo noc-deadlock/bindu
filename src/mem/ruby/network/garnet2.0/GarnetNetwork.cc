@@ -412,8 +412,25 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
             }
 
             // Case II: if the vc-0 is empty and a brownian bubble as well.
-
+            // then don't do anything here...
             // Case III: if vc-0 has a packet sitting.
+            else if ((inpUnit->vc_isEmpty(0) == false) &&
+                    (upstream_op_->is_vc_idle(0, curCycle()) == false)) {
+                flit* t_flit = inpUnit->getTopFlit(0);
+                // insert the flit at the location pointed out by the bubble
+                orig_inpUnit->insertFlit(0, t_flit);
+                // no credit management needed.
+                // update the bubble and break.
+                bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
+                bubble[bubble_id].last_inport_dirn = bubble[bubble_id].inport_dirn;
+                bubble[bubble_id].router_id = nxt_router_id;
+                bubble[bubble_id].inport_id = inpUnit->get_id();
+                bubble[bubble_id].inport_dirn = inpUnit->get_direction();
+                assert(bubble[bubble_id].inport_dirn != "Local");
+                bubble[bubble_id].last_inter_movement_cycle = curCycle();
+                moved_ = true;
+                break;
+            }
         }
     }
     // select and input port from next router
