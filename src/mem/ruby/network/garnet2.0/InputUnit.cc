@@ -107,7 +107,7 @@ InputUnit::wakeup()
             grant_outport(vc, outport);
             t_flit->set_outport(outport);
             PortDirection outport_dirn = m_router->getOutportDirection(outport);
-            t_flit->set_outport_dirn(outport);
+            t_flit->set_outport_dirn(outport_dirn);
 
         } else {
             assert(m_vcs[vc]->get_state() == ACTIVE_);

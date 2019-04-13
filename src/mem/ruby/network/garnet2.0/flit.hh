@@ -41,6 +41,9 @@
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
+typedef std::string PortDirection;
+
+
 class flit
 {
   public:
