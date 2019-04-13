@@ -75,9 +75,12 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     cout << "m_num_bubble: " << m_num_bubble << endl;
     // not reserve but resize
     bubble.resize(m_num_bubble);
-    m_inter_bubble_period = 2;
-    m_inter_bubble_period = 10;
+    m_intra_bubble_period = p->intra_period;
+    m_inter_bubble_period = p->inter_period;
+    cout << "m_intra_bubble_period: " << m_intra_bubble_period << endl;
+    cout << "m_inter_bubble_period: " << m_inter_bubble_period << endl;
     last_inter_bubble_movement = Cycles(0);
+    last_intra_bubble_movement = Cycles(0);
     // these should be later configured using command-line.
     // for now hard-codding them
 
@@ -297,11 +300,12 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
                     // schedule wakeup for this router at next inter-bubble-period.
+                    /*
                     if (curCycle() > Cycles(m_inter_bubble_period)) {
                         m_routers[router_id]->\
                         schedule_wakeup( Cycles(m_inter_bubble_period) - \
                         Cycles( uint64_t(curCycle()) % m_inter_bubble_period));
-                    }
+                    }*/
                     break;
                 }
                 //exchange with a packet.. no credit management is needed.

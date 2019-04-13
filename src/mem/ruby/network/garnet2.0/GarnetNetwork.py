@@ -52,6 +52,10 @@ class GarnetNetwork(RubyNetwork):
                             "to enable brownian network scheme in the network")
     num_bubble = Param.UInt32(Parent.num_bubble,
                             "number of brownian bubbles present in the network")
+    inter_period = Param.UInt32(Parent.inter_period,
+                            "number of cycles when bubble will move across router")
+    intra_period = Param.UInt32(Parent.intra_period,
+                            "number of cycles when bubble will shuffle within the router")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

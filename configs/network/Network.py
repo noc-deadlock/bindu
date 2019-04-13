@@ -82,6 +82,12 @@ def define_options(parser):
     parser.add_option("--num-bubble", action="store", type="int",
                     default=0,
                     help="number of brownian-bubbles in the network")
+    parser.add_option("--inter-period", action="store", type="int",
+                    default = 100,
+                    help="number of cycles when bubble will move across router")
+    parser.add_option("--intra-period", action="store", type="int",
+                    default = 50,
+                    help="number of cycles when bubble will shuffle within the router")
 
 def create_network(options, ruby):
 
@@ -117,6 +123,8 @@ def init_network(options, network, InterfaceClass):
         network.garnet_deadlock_threshold = options.garnet_deadlock_threshold
         network.enable_bn = options.enable_bn
         network.num_bubble = options.num_bubble
+        network.inter_period = options.inter_period
+        network.intra_period = options.intra_period
 
     if options.network == "simple":
         network.setup_buffers()
