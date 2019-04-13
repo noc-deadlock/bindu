@@ -63,6 +63,8 @@ class flit
     Cycles get_src_delay() { return src_delay; }
 
     void set_outport(int port) { m_outport = port; }
+    void set_outport_dirn(PortDirection outport_dirn) { m_outport_dirn = outport_dirn; }
+    PortDirection get_outport_dirn(void) { return (m_outport_dirn); }
     void set_time(Cycles time) { m_time = time; }
     void set_vc(int vc) { m_vc = vc; }
     void set_route(RouteInfo route) { m_route = route; }
@@ -109,6 +111,7 @@ class flit
     flit_type m_type;
     MsgPtr m_msg_ptr;
     int m_outport;
+    PortDirection m_outport_dirn;
     Cycles src_delay;
     std::pair<flit_stage, Cycles> m_stage;
 };

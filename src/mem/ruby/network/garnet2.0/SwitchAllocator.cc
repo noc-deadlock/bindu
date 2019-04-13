@@ -217,6 +217,7 @@ SwitchAllocator::arbitrate_outports()
                 // outport is updated in VC, but not in flit
                 assert(t_flit->get_outport() == outport);
                 t_flit->set_outport(outport);
+                t_flit->set_outport_dirn(m_router->getOutportDirection(outport));
 
                 // set outvc (i.e., invc for next hop) in flit
                 // (This was updated in VC by vc_allocate, but not in flit)

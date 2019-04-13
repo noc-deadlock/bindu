@@ -416,7 +416,17 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
             // Case III: if vc-0 has a packet sitting.
             else if ((inpUnit->vc_isEmpty(0) == false) &&
                     (upstream_op_->is_vc_idle(0, curCycle()) == false)) {
-                flit* t_flit = inpUnit->getTopFlit(0);
+                flit* t_flit = inpUnit->peekTopFlit(0);
+                if (t_flit->get_outport_dirn() == "Local")
+                    continue;
+                t_flit = inpUnit->getTopFlit(0);
+                // re-compute the route from orig router and add it to this flit
+                Router* orig_router = m_routers[bubble[bubble_id].router_id];
+                int outport = orig_router->route_compute(t_flit->get_route(),
+                            orig_inpUnit->get_id(), orig_inpUnit->get_direction());
+                t_flit->set_outport(outport);
+                PortDirection out_dirn = orig_router->getOutportDirection(outport);
+                t_flit->set_outport_dirn(out_dirn);
                 // insert the flit at the location pointed out by the bubble
                 orig_inpUnit->insertFlit(0, t_flit);
                 // no credit management needed.

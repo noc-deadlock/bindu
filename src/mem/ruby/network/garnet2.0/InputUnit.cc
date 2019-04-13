@@ -106,6 +106,8 @@ InputUnit::wakeup()
             // The output port field in the flit is updated after it wins SA
             grant_outport(vc, outport);
             t_flit->set_outport(outport);
+            PortDirection outport_dirn = m_router->getOutportDirection(outport);
+            t_flit->set_outport_dirn(outport);
 
         } else {
             assert(m_vcs[vc]->get_state() == ACTIVE_);
