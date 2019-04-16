@@ -103,9 +103,20 @@ class OutputUnit : public Consumer
     int get_dest_router() {
         return m_dest_router;
     }
-
-
     int get_id() { return m_id; }
+
+  int getNumFreeVCs(int vnet)
+  {
+      int freeVC = 0;
+      int vc_base = vnet*m_vc_per_vnet;
+      for (int vc = vc_base; vc < vc_base + m_vc_per_vnet; vc++) {
+          if (is_vc_idle(vc, m_router->curCycle()))
+              freeVC++;
+      }
+      return freeVC;
+
+  }
+
 
   private:
     int m_id;

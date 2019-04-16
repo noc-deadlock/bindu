@@ -115,6 +115,10 @@ class GarnetNetwork : public Network
         cout << "m_total_packets_received: " << m_total_packets_received++ << endl;
     }
 
+    Router*
+    get_RouterInDirn(PortDirection outport_dir, int upstream_id);
+
+
     void
     increment_packet_network_latency(Cycles latency, int vnet)
     {

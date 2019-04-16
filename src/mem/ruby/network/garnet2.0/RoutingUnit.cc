@@ -37,6 +37,7 @@
 #include "base/logging.hh"
 #include "mem/ruby/network/garnet2.0/InputUnit.hh"
 #include "mem/ruby/network/garnet2.0/Router.hh"
+#include "mem/ruby/network/garnet2.0/OutputUnit.hh"
 #include "mem/ruby/slicc_interface/Message.hh"
 
 RoutingUnit::RoutingUnit(Router *router)
@@ -106,10 +107,39 @@ RoutingUnit::lookupRoutingTable(int vnet, NetDest msg_destination)
         exit(0);
     }
 
+    // go to output unit pointed by each outport of the router and
+    // print out the OutVC state of each of those outport VC
+    int outport_id;
+    std::vector<int>outport_credit_index; // keep the total credit count
+                                        // at the outport-id index
+
+    int accum_;
+    for(int i = 0; i < output_link_candidates.size(); i++) {
+
+        outport_id = output_link_candidates[i];
+
+        accum_ = 0;
+
+        // get credit count for each outvc
+        accum_ += m_router->get_outputUnit_ref()[outport_id]\
+                    ->getNumFreeVCs(vnet);
+        outport_credit_index.push_back(accum_);
+    }
+
+    // now you have populated the vector, find the max entry
+    int max = -1;
+    int candidate = -1;
+    for(int i = 0; i < outport_credit_index.size(); i++ ) {
+        if(outport_credit_index[i] > max) {
+            max = outport_credit_index[i];
+            candidate = i;
+        }
+    }
+
     // Randomly select any candidate output link
-    int candidate = 0;
-    if (!(m_router->get_net_ptr())->isVNetOrdered(vnet))
-        candidate = rand() % num_candidates;
+//    int candidate = 0;
+//    if (!(m_router->get_net_ptr())->isVNetOrdered(vnet))
+//        candidate = rand() % num_candidates;
 
     output_link = output_link_candidates.at(candidate);
     return output_link;
@@ -163,6 +193,12 @@ RoutingUnit::outportCompute(RouteInfo route, int inport,
             outportComputeXY(route, inport, inport_dirn); break;
         case RANDOM_: outport =
             outportComputeRandom(route, inport, inport_dirn); break;
+        case ADAPT_RAND_: outport =
+            outportComputeAdaptRand(route, inport, inport_dirn); break;
+        case WestFirst_: outport =
+            outportComputeWestFirst(route, inport, inport_dirn); break;
+        case ADAPT_WestFirst_: outport =
+            outportComputeAdaptWestFirst(route, inport, inport_dirn); break;
         // any custom algorithm
         case CUSTOM_: outport =
             outportComputeCustom(route, inport, inport_dirn); break;
@@ -293,6 +329,277 @@ int RoutingUnit::outportComputeRandom(RouteInfo route,
     return m_outports_dirn2idx[outport_dirn];
 }
 
+// Adaptive random routing algorithm...
+int RoutingUnit::outportComputeAdaptRand(RouteInfo route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    int num_rows = m_router->get_net_ptr()->getNumRows();
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+    assert(num_rows > 0 && num_cols > 0);
+
+    int my_id = m_router->get_id();
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_x = dest_id % num_cols;
+    int dest_y = dest_id / num_cols;
+
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    bool x_dirn = (dest_x >= my_x);
+    bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0));
+
+    if (x_hops == 0)
+    {
+        if (y_dirn > 0)
+            outport_dirn = "North";
+        else
+            outport_dirn = "South";
+    }
+    else if (y_hops == 0)
+    {
+        if (x_dirn > 0)
+            outport_dirn = "East";
+        else
+            outport_dirn = "West";
+    }
+    else
+    {
+        // whichever router has more free VCs route there
+        int rand = random() % 2;
+        Router *router_Est, *router_Wst, *router_South, *router_Nrth;
+        if (x_dirn && y_dirn) {// Quadrant I
+            // check for routers in both 'East' and 'North'
+            // direction
+            router_Est = m_router->get_net_ptr()->\
+                get_RouterInDirn( "East", m_router->get_id());
+            router_Nrth = m_router->get_net_ptr()->\
+                get_RouterInDirn( "North", m_router->get_id());
+            // caution: 'dirn_' is the direction of inport of
+            // downstream router
+            int freeVC_East = router_Est->get_numFreeVC("West");
+            int freeVC_North = router_Nrth->get_numFreeVC("South");
+
+            if (freeVC_East > freeVC_North)
+                outport_dirn = "East";
+            else if (freeVC_North > freeVC_East)
+                outport_dirn = "North";
+            else
+                outport_dirn = rand ? "East" : "North";
+
+        }
+        else if (!x_dirn && y_dirn) {// Quadrant II
+
+            router_Wst = m_router->get_net_ptr()->\
+                get_RouterInDirn( "West", m_router->get_id());
+            router_Nrth = m_router->get_net_ptr()->\
+                get_RouterInDirn( "North", m_router->get_id());
+
+            int freeVC_West = router_Wst->get_numFreeVC("East");
+            int freeVC_North = router_Nrth->get_numFreeVC("South");
+
+            if (freeVC_North > freeVC_West)
+                outport_dirn = "North";
+            else if (freeVC_West > freeVC_North)
+                outport_dirn = "West";
+            else
+                outport_dirn = rand ? "West" : "North";
+
+        }
+        else if (!x_dirn && !y_dirn) {// Quadrant III
+
+            router_Wst = m_router->get_net_ptr()->\
+                get_RouterInDirn( "West", m_router->get_id());
+            router_South = m_router->get_net_ptr()->\
+                get_RouterInDirn( "South", m_router->get_id());
+
+            int freeVC_West = router_Wst->get_numFreeVC("East");
+            int freeVC_South = router_South->get_numFreeVC("North");
+
+            if (freeVC_South > freeVC_West)
+                outport_dirn = "South";
+            else if (freeVC_West > freeVC_South)
+                outport_dirn = "West";
+            else
+                outport_dirn = rand ? "West" : "South";
+        }
+        else {// Quadrant IV
+
+            router_Est = m_router->get_net_ptr()->\
+                get_RouterInDirn( "East", m_router->get_id());
+            router_South = m_router->get_net_ptr()->\
+                get_RouterInDirn( "South", m_router->get_id());
+
+            int freeVC_East = router_Est->get_numFreeVC("West");
+            int freeVC_South = router_South->get_numFreeVC("North");
+
+            if (freeVC_South > freeVC_East)
+                outport_dirn = "South";
+            else if (freeVC_East > freeVC_South)
+                outport_dirn = "East";
+            else
+                outport_dirn = rand ? "East" : "South";
+        }
+    }
+
+    return m_outports_dirn2idx[outport_dirn];
+}
+
+int RoutingUnit::outportComputeWestFirst(RouteInfo route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    int num_rows = m_router->get_net_ptr()->getNumRows();
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+    assert(num_rows > 0 && num_cols > 0);
+
+    int my_id = m_router->get_id();
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_x = dest_id % num_cols;
+    int dest_y = dest_id / num_cols;
+
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    bool x_dirn = (dest_x >= my_x);
+    bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0));
+
+    int rand = random() % 2;
+
+    if (x_hops == 0)
+    {
+        if (y_dirn > 0)
+            outport_dirn = "North";
+        else
+            outport_dirn = "South";
+    }
+    else if (y_hops == 0)
+    {
+        if (x_dirn > 0)
+            outport_dirn = "East";
+        else
+            outport_dirn = "West";
+    }
+    else if (!(x_dirn))
+    {
+        outport_dirn = "West";
+    }
+    else if (y_dirn)
+    {
+        outport_dirn = rand ? "East" : "North";
+    }
+    else if (!(y_dirn))
+    {
+        outport_dirn = rand ? "East" : "South";
+    }
+
+    return m_outports_dirn2idx[outport_dirn];
+
+}
+
+
+int RoutingUnit::outportComputeAdaptWestFirst(RouteInfo route,
+                                int inport,
+                                PortDirection inport_dirn)
+{
+    PortDirection outport_dirn = "Unknown";
+
+    int num_rows = m_router->get_net_ptr()->getNumRows();
+    int num_cols = m_router->get_net_ptr()->getNumCols();
+    assert(num_rows > 0 && num_cols > 0);
+
+    int my_id = m_router->get_id();
+    int my_x = my_id % num_cols;
+    int my_y = my_id / num_cols;
+
+    int dest_id = route.dest_router;
+    int dest_x = dest_id % num_cols;
+    int dest_y = dest_id / num_cols;
+
+    int x_hops = abs(dest_x - my_x);
+    int y_hops = abs(dest_y - my_y);
+
+    bool x_dirn = (dest_x >= my_x);
+    bool y_dirn = (dest_y >= my_y);
+
+    // already checked that in outportCompute() function
+    assert(!(x_hops == 0 && y_hops == 0));
+    int rand = random() % 2;
+    Router *router_Est, *router_South, *router_Nrth;
+    if (x_hops == 0)
+    {
+        if (y_dirn > 0)
+            outport_dirn = "North";
+        else
+            outport_dirn = "South";
+    }
+    else if (y_hops == 0)
+    {
+        if (x_dirn > 0)
+            outport_dirn = "East";
+        else
+            outport_dirn = "West";
+    }
+    else if (!(x_dirn))
+    {
+        outport_dirn = "West";
+    }
+    else if (y_dirn)
+    {
+        router_Est = m_router->get_net_ptr()->\
+            get_RouterInDirn( "East", m_router->get_id());
+        router_Nrth = m_router->get_net_ptr()->\
+            get_RouterInDirn( "North", m_router->get_id());
+        // caution: 'dirn_' is the direction of inport of
+        // downstream router
+        int freeVC_East = router_Est->get_numFreeVC("West");
+        int freeVC_North = router_Nrth->get_numFreeVC("South");
+
+        if (freeVC_East > freeVC_North)
+            outport_dirn = "East";
+        else if (freeVC_North > freeVC_East)
+            outport_dirn = "North";
+        else
+            outport_dirn = rand ? "East" : "North";
+    }
+    else if (!(y_dirn))
+    {
+        router_Est = m_router->get_net_ptr()->\
+            get_RouterInDirn( "East", m_router->get_id());
+        router_South = m_router->get_net_ptr()->\
+            get_RouterInDirn( "South", m_router->get_id());
+
+        int freeVC_East = router_Est->get_numFreeVC("West");
+        int freeVC_South = router_South->get_numFreeVC("North");
+
+        if (freeVC_South > freeVC_East)
+            outport_dirn = "South";
+        else if (freeVC_East > freeVC_South)
+            outport_dirn = "East";
+        else
+            outport_dirn = rand ? "East" : "South";
+
+    }
+
+    return m_outports_dirn2idx[outport_dirn];
+
+}
 
 // Template for implementing custom routing algorithm
 // using port directions. (Example adaptive)
