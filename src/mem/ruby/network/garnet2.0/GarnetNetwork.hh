@@ -41,6 +41,7 @@
 #include "mem/ruby/network/fault_model/FaultModel.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "params/GarnetNetwork.hh"
+using namespace std;
 
 class FaultModel;
 class NetworkInterface;
@@ -109,7 +110,10 @@ class GarnetNetwork : public Network
 
     // increment counters
     void increment_injected_packets(int vnet) { m_packets_injected[vnet]++; }
-    void increment_received_packets(int vnet) { m_packets_received[vnet]++; }
+    void increment_received_packets(int vnet) {
+        m_packets_received[vnet]++;
+        cout << "m_total_packets_received: " << m_total_packets_received++ << endl;
+    }
 
     void
     increment_packet_network_latency(Cycles latency, int vnet)
@@ -159,6 +163,7 @@ class GarnetNetwork : public Network
     uint32_t m_inter_bubble_period;
     Cycles last_inter_bubble_movement;
     Cycles last_intra_bubble_movement;
+    uint64_t m_total_packets_received;
 
     struct brownian_bubble {
         uint32_t bubble_id;

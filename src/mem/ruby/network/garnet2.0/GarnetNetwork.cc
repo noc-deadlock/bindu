@@ -81,6 +81,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     cout << "m_inter_bubble_period: " << m_inter_bubble_period << endl;
     last_inter_bubble_movement = Cycles(0);
     last_intra_bubble_movement = Cycles(0);
+    m_total_packets_received = 0;
     // these should be later configured using command-line.
     // for now hard-codding them
 
@@ -507,8 +508,8 @@ GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
                 next_router_id = curr_router_id + 1;
         }
     }
-    cout << "curr_router_id: " << curr_router_id << endl;
-    cout << "next_router_id: " << next_router_id  << endl;
+    // cout << "curr_router_id: " << curr_router_id << endl;
+    // cout << "next_router_id: " << next_router_id  << endl;
     assert (next_router_id >= 0);
     assert (next_router_id < m_routers.size());
     return (next_router_id);
