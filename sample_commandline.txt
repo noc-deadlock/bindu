@@ -1,0 +1,81 @@
+Sample commandline:
+--------------------
+./build/Garnet_standalone/gem5.opt configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=1000 --inj-vnet=0 --vcs-per-vnet=3 --enable-bn=1 --num-bubble=1 --injectionrate=0.5 --synthetic=uniform_random --routing-algorithm=0
+---------------------
+./build/Garnet_standalone/gem5.opt configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=1000 --inj-vnet=0 --vcs-per-vnet=3 --enable-bn=1 --num-bubble=4 --injectionrate=0.50 --synthetic=uniform_random --routing-algorithm=0
+---------------------
+gor 16c Mesh:
+---------------------
+./build/Garnet_standalone/gem5.opt configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=16 --num-dirs=16 --mesh-rows=4 --network=garnet2.0 --router-latency=1 --sim-cycles=1000 --inj-vnet=0 --vcs-per-vnet=3 --enable-bn=1 --num-bubble=4 --injectionrate=0.50 --synthetic=uniform_random --routing-algorithm=0
+
+======
+Offending commandline
+======
+gdb --args ./build/Garnet_standalone/gem5.opt configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=16 --num-dirs=16 --mesh-rows=4 --network=garnet2.0 --router-latency=1 --sim-cycles=1000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --injectionrate=0.50 --synthetic=uniform_random --routing-algorithm=1
+=============
+Sample command-line:
+----
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=10000 --inj-vnet=0 --vcs-per-vnet=3 --enable-bn=1 --num-bubble=4 --injectionrate=0.50 --synthetic=uniform_random --routing-algorithm=1
+---------
+New sample command-line:
+------------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=100000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --inter-period=1000 --intra-period=100 --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=2
+--------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=100000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=4 --inter-period=1000 --intra-period=100 --injectionrate=0.20 --synthetic=bit_complement --routing-algorithm=2
+----------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=16 --num-dirs=16 --mesh-rows=4 --network=garnet2.0 --router-latency=1 --sim-cycles=100000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=2
+----------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=100000 --inj-vnet=0 --vcs-per-vnet=1 --num-packets-max=20 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=2
+-----------
+packets_injected = 486
+packets_received = 239
+average_packet_queueing_latency = 3314.857741
+average_packet_network_latency = 9872.087866
+average_packet_latency = 13186.945607
+flits_injected = 486
+flits_received = 239
+average_flit_queueing_latency = 3314.857741
+average_flit_network_latency = 9872.087866
+average_flit_latency = 13186.945607
+average_hops = 4.221757
+---------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=10000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --injectionrate=0.10 --synthetic=uniform_random --routing-algorithm=2
+----
+packets_injected = 368
+packets_received = 167
+average_packet_queueing_latency = 221.880240
+average_packet_network_latency = 839.155689
+average_packet_latency = 1061.035928
+flits_injected = 368
+flits_received = 167
+average_flit_queueing_latency = 221.880240
+average_flit_network_latency = 839.155689
+average_flit_latency = 1061.035928
+average_hops = 4.113772
+
+----------
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=1000000 --inj-vnet=0 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --injectionrate=0.10 --synthetic=uniform_random --routing-algorithm=2
+----------------
+packets_injected = 581
+packets_received = 309
+average_packet_queueing_latency = 16500.126214
+average_packet_network_latency = 98078.653722
+average_packet_latency = 114578.779935
+flits_injected = 581
+flits_received = 309
+average_flit_queueing_latency = 16500.126214
+average_flit_network_latency = 98078.653722
+average_flit_latency = 114578.779935
+average_hops = 4.226537
+============================
+ ./build/RISCV_MESI_Two_Level/gem5.opt -d BFS configs/example/se.py --cpu-type DerivO3CPU -n 64 -c /home/mparasar/ligra/apps/BFS -o '-n 64 /home/mparasar/ligra/apps/../inputs/rMatGraph_J_5_100' --ruby --network=garnet2.0 --mem-size=4096MB --mesh-rows=8 --vcs-per-vnet=1 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --routing-algorithm=2 --topology=Mesh_XY
+-----------------
+another command-line:
+ ./build/RISCV_MESI_Two_Level/gem5.opt -d $out_dir/${benchmarks[$b]}/${routAlgo[$algo_]}/vc-${vc_} --remote-gdb-port=0 configs/example/se.py --cpu-type TimingSimpleCPU --num-cpus=64 --l1d_size=16kB --l1i_size=16kB --l1d_assoc=4 --num-l2caches=64 --l2_size=128kB --l2_assoc=8 --num-dirs=4 --ruby --mem-size=4096MB --network=garnet2.0 --topology=MeshDirCorners_XY --mesh-rows=8 --vcs-per-vnet=${vc_} --routing-algorithm=${algo_} -c my_benchmarks/ligra/bin/riscv/${benchmarks[$b]} -o '-n 64 my_benchmarks/ligra/input/rMatGraph_J_5_100'
+---------------------
+./build/RISCV_MESI_Two_Level/gem5.opt --remote-gdb-port=0 configs/example/se.py --cpu-type TimingSimpleCPU --num-cpus=64 --l1d_size=16kB --l1i_size=16kB --l1d_assoc=4 --num-l2caches=64 --l2_size=128kB --l2_assoc=8 --num-dirs=4 --ruby --mem-size=4096MB --network=garnet2.0 --topology=Mesh_XY --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --mesh-rows=8 --vcs-per-vnet=2 --routing-algorithm=2 -c my_benchmarks/ligra/bin/riscv/BFS -o '-n 64 my_benchmarks/ligra/input/rMatGraph_J_5_100'
+==========================
+working command-line:
+------
+./build/RISCV_MESI_Two_Level/gem5.debug --remote-gdb-port=0 configs/example/se.py --cpu-type TimingSimpleCPU --num-cpus=64 --l1d_size=16kB --l1i_size=16kB --l1d_assoc=4 --num-l2caches=64 --l2_size=128kB --l2_assoc=8 --num-dirs=4 --ruby --mem-size=4096MB --network=garnet2.0 --topology=Mesh_XY --mesh-rows=8 --vcs-per-vnet=2 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --routing-algorithm=2 -c my_benchmarks/ligra/bin/riscv/BFS -o '-n 64 my_benchmarks/ligra/input/rMatGraph_J_5_100'
+---------
