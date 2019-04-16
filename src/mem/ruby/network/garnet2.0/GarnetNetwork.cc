@@ -300,6 +300,9 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     assert(bubble[id].inport_dirn != "Local");
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
+                    // update the stats here...
+                    m_num_intra_swap++;
+                    m_intra_swap_bubble++;
                     // schedule wakeup for this router at next inter-bubble-period.
                     /*
                     if (curCycle() > Cycles(m_inter_bubble_period)) {
@@ -324,6 +327,9 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     assert(bubble[id].inport_dirn != "Local");
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
+                    // update stats here:
+                    m_num_intra_swap++;
+                    m_intra_swap_pkt++;
                     break;
                 }
                 else {
@@ -413,6 +419,9 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 assert(bubble[bubble_id].inport_dirn != "Local");
                 bubble[bubble_id].last_inter_movement_cycle = curCycle();
                 moved_ = true;
+                // Update stats here:
+                m_num_inter_swap++;
+                m_inter_swap_bubble++;
                 break;
             }
 
@@ -444,6 +453,8 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 assert(bubble[bubble_id].inport_dirn != "Local");
                 bubble[bubble_id].last_inter_movement_cycle = curCycle();
                 moved_ = true;
+                m_num_inter_swap++;
+                m_inter_swap_pkt++;
                 break;
             }
         }

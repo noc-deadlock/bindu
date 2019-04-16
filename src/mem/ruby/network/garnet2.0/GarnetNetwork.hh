@@ -181,7 +181,6 @@ class GarnetNetwork : public Network
     };
 
     std::vector<brownian_bubble> bubble;
-
   protected:
     // Configuration
     int m_num_rows;
@@ -195,6 +194,7 @@ class GarnetNetwork : public Network
 
     // Statistical variables
 
+    // statistical variable (~public~ :P)
     // Brownian Network Related
     Stats::Scalar m_num_inter_swap;
     Stats::Scalar m_num_intra_swap;
@@ -202,6 +202,7 @@ class GarnetNetwork : public Network
     Stats::Scalar m_intra_swap_bubble;
     Stats::Scalar m_intra_swap_pkt;
     Stats::Scalar m_inter_swap_pkt;
+
 
     Stats::Vector m_packets_received;
     Stats::Vector m_packets_injected;
