@@ -739,6 +739,19 @@ GarnetNetwork::regStats()
 {
     Network::regStats();
 
+    m_num_inter_swap
+        .name(name() + ".total_inter_swap");
+    m_num_intra_swap
+        .name(name() + ".total_intra_swap");
+    m_inter_swap_bubble
+        .name(name() + ".inter_bubble_swap");
+    m_intra_swap_bubble
+        .name(name() + ".intra_bubble_swap");
+    m_inter_swap_pkt
+        .name(name() + ".inter_swap_pkt");
+    m_intra_swap_pkt
+        .name(name() + ".intra_swap_pkt");
+
     // Packets
     m_packets_received
         .init(m_virtual_networks)
