@@ -57,6 +57,7 @@ class flitBuffer
     flit *
     getTopFlit()
     {
+        assert(m_buffer.size() >= 1);
         flit *f = m_buffer.front();
         std::pop_heap(m_buffer.begin(), m_buffer.end(), flit::greater);
         m_buffer.pop_back();
@@ -66,6 +67,7 @@ class flitBuffer
     flit *
     peekTopFlit()
     {
+        assert(m_buffer.size() >= 1);
         return m_buffer.front();
     }
 

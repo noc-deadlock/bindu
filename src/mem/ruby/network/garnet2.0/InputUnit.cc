@@ -100,7 +100,7 @@ InputUnit::wakeup()
             // Route computation for this vc
             int outport = m_router->route_compute(t_flit->get_route(),
                 m_id, m_direction);
-
+            assert(outport < m_router->get_outputUnit_ref().size());
             // Update output port in VC
             // All flits in this packet will use this output port
             // The output port field in the flit is updated after it wins SA

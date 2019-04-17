@@ -507,8 +507,8 @@ GarnetNetwork::move_next_router(int curr_router_id, int bubble_id) {
                 next_router_id = curr_router_id + 1;
         }
     }
-    cout << "curr_router_id: " << curr_router_id << endl;
-    cout << "next_router_id: " << next_router_id  << endl;
+    // cout << "curr_router_id: " << curr_router_id << endl;
+    // cout << "next_router_id: " << next_router_id  << endl;
     assert (next_router_id >= 0);
     assert (next_router_id < m_routers.size());
     return (next_router_id);
