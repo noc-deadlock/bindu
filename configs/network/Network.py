@@ -88,6 +88,15 @@ def define_options(parser):
     parser.add_option("--intra-period", action="store", type="int",
                     default = 50,
                     help="number of cycles when bubble will shuffle within the router")
+    parser.add_option("--warmup-cycles", action="store",
+                      type="int", default=1000,
+                      help="number of cycles before marked packets get injected\
+                      into the network")
+    parser.add_option("--marked-flits", action="store",
+                      type="int", default=100000,
+                      help="number of marked flits injected into the network\
+                      marked packets would be just /k where ther are k-flits\
+                      per packet")
 
 def create_network(options, ruby):
 
@@ -125,6 +134,9 @@ def init_network(options, network, InterfaceClass):
         network.num_bubble = options.num_bubble
         network.inter_period = options.inter_period
         network.intra_period = options.intra_period
+        network.sim_type = options.sim_type
+        network.warmup_cycles = options.warmup_cycles
+        network.marked_flits = options.marked_flits
 
     if options.network == "simple":
         network.setup_buffers()

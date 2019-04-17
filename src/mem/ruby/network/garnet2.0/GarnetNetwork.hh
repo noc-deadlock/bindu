@@ -41,6 +41,8 @@
 #include "mem/ruby/network/fault_model/FaultModel.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "params/GarnetNetwork.hh"
+#include "sim/sim_exit.hh"
+
 using namespace std;
 
 class FaultModel;
@@ -50,6 +52,7 @@ class NetDest;
 class NetworkLink;
 class CreditLink;
 
+using namespace std;
 class GarnetNetwork : public Network
 {
   public:
@@ -85,6 +88,7 @@ class GarnetNetwork : public Network
         return m_vnet_type[vnet];
     }
     int getNumRouters();
+    std::vector<Router *> get_routers_ref() { return(m_routers); }
     int get_router_id(int ni);
 
 
@@ -108,9 +112,62 @@ class GarnetNetwork : public Network
     void regStats();
     void print(std::ostream& out) const;
 
+    bool check_mrkd_flt(void);
+
     // increment counters
-    void increment_injected_packets(int vnet) { m_packets_injected[vnet]++; }
-    void increment_received_packets(int vnet) {
+    void update_flit_latency_histogram(Cycles& latency, int vnet,
+                                                    bool marked) {
+        if(marked == true) {
+            m_marked_flt_latency_hist.sample(latency);
+            if(latency > marked_flit_latency)
+                marked_flit_latency = latency;
+        }
+        else {
+            m_flt_latency_hist.sample(latency);
+            if(latency > flit_latency)
+                flit_latency = latency;
+        }
+    }
+
+    void update_flit_network_latency_histogram(Cycles& latency,
+                                                int vnet, bool marked) {
+        if(marked == true) {
+            m_marked_flt_network_latency_hist.sample(latency);
+            if(latency > marked_flit_network_latency)
+                marked_flit_network_latency = latency;
+        }
+        else {
+            m_flt_network_latency_hist.sample(latency);
+            if(latency > flit_network_latency)
+                flit_network_latency = latency;
+        }
+    }
+
+    void update_flit_queueing_latency_histogram(Cycles& latency,
+                                                int vnet, bool marked) {
+        if(marked == true) {
+            m_marked_flt_queueing_latency_hist.sample(latency);
+            if(latency > marked_flit_queueing_latency)
+                marked_flit_queueing_latency = latency;
+        }
+        else {
+            m_flt_queueing_latency_hist.sample(latency);
+            if(latency > flit_queueing_latency)
+                flit_queueing_latency = latency;
+        }
+    }
+
+    void increment_injected_packets(int vnet, bool marked) {
+        if(marked == true) {
+            m_marked_pkt_injected[vnet]++;
+        }
+
+        m_packets_injected[vnet]++;
+    }
+    void increment_received_packets(int vnet, bool marked) {
+        if(marked == true) {
+            m_marked_pkt_received[vnet]++;
+        }
         m_packets_received[vnet]++;
         cout << "m_total_packets_received: " << m_total_packets_received++ << endl;
     }
@@ -120,37 +177,126 @@ class GarnetNetwork : public Network
 
 
     void
-    increment_packet_network_latency(Cycles latency, int vnet)
+    increment_packet_network_latency(Cycles latency, int vnet, bool marked)
     {
         m_packet_network_latency[vnet] += latency;
+        if(marked == true) {
+            m_marked_pkt_network_latency[vnet] += latency;
+        }
     }
 
     void
-    increment_packet_queueing_latency(Cycles latency, int vnet)
-    {
+    increment_packet_queueing_latency(Cycles latency, int vnet, bool marked)
+     {
         m_packet_queueing_latency[vnet] += latency;
+        if(marked == true) {
+            m_marked_pkt_queueing_latency[vnet] += latency;
+        }
     }
 
-    void increment_injected_flits(int vnet) { m_flits_injected[vnet]++; }
-    void increment_received_flits(int vnet) { m_flits_received[vnet]++; }
+    void increment_injected_flits(int vnet, bool marked, int m_router_id) {
+          m_flits_injected[vnet]++;
+          // std::cout << "flit injected into the network..." << std::endl;
+          m_flt_dist[m_router_id]++;
+          if(marked == true) {
+              m_marked_flt_injected[vnet]++;
+              m_marked_flt_dist[m_router_id]++;
+              marked_flt_injected++;
+              std::cout << "marked flit injected: " << marked_flt_injected \
+                << " at cycle(): " << curCycle() << std::endl;
+          }
+        //      if (curCycle() > 550) {
+        //            scanNetwork();
+        //            assert(0);
+        //      }
+        }
+
+
+    void increment_received_flits(int vnet, bool marked) {
+        m_flits_received[vnet]++;
+        if(marked == true) {
+            m_marked_flt_received[vnet]++;
+            marked_flt_received++;
+            total_marked_flit_received++;
+
+            bool sim_exit;
+            sim_exit = check_mrkd_flt();
+
+            if(sim_exit) {
+                cout << "marked_flt_injected: " << marked_flt_injected << endl;
+                cout << "marked_flt_received: " << marked_flt_received << endl;
+                assert(marked_flt_injected == marked_flt_received);
+                cout << "marked_flits: " << marked_flits << endl;
+                // transfer all numbers to stat variable:
+                  m_max_flit_latency = flit_latency;
+                  m_max_flit_network_latency = flit_network_latency;
+                  m_max_flit_queueing_latency = flit_queueing_latency;
+                  m_max_marked_flit_latency = marked_flit_latency;
+                  m_max_marked_flit_network_latency = marked_flit_network_latency;
+                  m_max_marked_flit_queueing_latency = marked_flit_queueing_latency;
+
+                exitSimLoop("All marked packet received.");
+            }
+
+        }
+    }
 
     void
-    increment_flit_network_latency(Cycles latency, int vnet)
+    increment_flit_network_latency(Cycles latency, int vnet, bool marked)
     {
         m_flit_network_latency[vnet] += latency;
+        if(marked == true) {
+            m_marked_flt_network_latency[vnet] += latency;
+            total_marked_flit_latency += (uint64_t)latency;
+        }
     }
 
     void
-    increment_flit_queueing_latency(Cycles latency, int vnet)
+    increment_flit_queueing_latency(Cycles latency, int vnet, bool marked)
     {
         m_flit_queueing_latency[vnet] += latency;
+        if(marked == true) {
+            m_marked_flt_queueing_latency[vnet] += latency;
+            total_marked_flit_latency += (uint64_t)latency;
+        }
     }
 
     void
-    increment_total_hops(int hops)
+    increment_total_hops(int hops, bool marked)
     {
         m_total_hops += hops;
+        if(marked == true) {
+            m_marked_total_hops += hops;
+        }
     }
+
+    void
+    check_network_saturation()
+    {
+        double avg_flt_network_latency;
+        /*cout << "total marked_flit latency (queuing+network): " \
+            << total_marked_flit_latency << std::endl;*/
+        cout << "total marked flit latency: " << total_marked_flit_latency << endl;
+        cout << "total marked flit received: " << total_marked_flit_received << endl;
+        if (total_marked_flit_received > 0) {
+            avg_flt_network_latency =
+                (double)total_marked_flit_latency/(double)total_marked_flit_received;
+            cout << "average marked flit latency: " << avg_flt_network_latency << endl;
+            cout.flush();
+        }
+        else {
+            avg_flt_network_latency = 0.0;
+        }
+        if(avg_flt_network_latency > 1000.0)
+            exitSimLoop("avg flit latency exceeded threshold!.");
+        // Due to livelock if sim-type-2 takes a very long time
+        // then exit thsi simulation so that other can procced.
+        if(curCycle() > 10000000 ) {
+            m_pre_mature_exit++;
+            exitSimLoop("Simulation exceed its cycle quota!");
+        }
+    }
+
 
     void print_brownian_bubbles();
     void init_brownian_bubbles();
@@ -185,7 +331,32 @@ class GarnetNetwork : public Network
     };
 
     std::vector<brownian_bubble> bubble;
+
+    uint64_t total_marked_flit_latency;
+    uint64_t total_marked_flit_received;
+
+    Stats::Scalar m_pre_mature_exit;
+
+    uint64_t marked_flt_injected;
+    uint64_t marked_flt_received;
+    uint64_t marked_pkt_injected;
+    uint64_t marked_pkt_received;
+    uint64_t warmup_cycles;
+    uint64_t marked_flits;
+
+    int sim_type;
+    Cycles flit_latency;
+    Cycles flit_network_latency;
+    Cycles flit_queueing_latency;
+    Cycles marked_flit_latency;
+    Cycles marked_flit_network_latency;
+    Cycles marked_flit_queueing_latency;
+
+
   protected:
+    Stats::Vector m_marked_flt_dist;
+    Stats::Vector m_flt_dist;
+
     // Configuration
     int m_num_rows;
     int m_num_cols;
@@ -198,7 +369,7 @@ class GarnetNetwork : public Network
 
     // Statistical variables
 
-    // statistical variable (~public~ :P)
+    // statistical variable
     // Brownian Network Related
     Stats::Scalar m_num_inter_swap;
     Stats::Scalar m_num_intra_swap;
@@ -207,11 +378,46 @@ class GarnetNetwork : public Network
     Stats::Scalar m_intra_swap_pkt;
     Stats::Scalar m_inter_swap_pkt;
 
+    Stats::Scalar m_max_flit_latency;
+    Stats::Scalar m_max_flit_network_latency;
+    Stats::Scalar m_max_flit_queueing_latency;
+    Stats::Scalar m_max_marked_flit_latency;
+    Stats::Scalar m_max_marked_flit_network_latency;
+    Stats::Scalar m_max_marked_flit_queueing_latency;
 
+
+    //! Histogram !//
+    Stats::Histogram m_flt_latency_hist;
+    Stats::Histogram m_marked_flt_latency_hist;
+    Stats::Histogram m_flt_network_latency_hist;
+    Stats::Histogram m_flt_queueing_latency_hist;
+    Stats::Histogram m_marked_flt_network_latency_hist;
+    Stats::Histogram m_marked_flt_queueing_latency_hist;
+
+    Stats::Vector m_network_latency_histogram;
     Stats::Vector m_packets_received;
     Stats::Vector m_packets_injected;
     Stats::Vector m_packet_network_latency;
     Stats::Vector m_packet_queueing_latency;
+
+    Stats::Vector m_marked_pkt_network_latency;
+    Stats::Vector m_marked_pkt_queueing_latency;
+    Stats::Vector m_marked_flt_network_latency;
+    Stats::Vector m_marked_flt_queueing_latency;
+
+    Stats::Vector m_marked_flt_injected;
+    Stats::Vector m_marked_flt_received;
+    Stats::Vector m_marked_pkt_injected;
+    Stats::Vector m_marked_pkt_received;
+
+    Stats::Formula m_avg_marked_flt_latency;
+    Stats::Formula m_avg_marked_pkt_latency;
+    Stats::Formula m_avg_marked_pkt_network_latency;
+    Stats::Formula m_avg_marked_pkt_queueing_latency;
+    Stats::Formula m_avg_marked_flt_network_latency;
+    Stats::Formula m_avg_marked_flt_queueing_latency;
+    Stats::Formula m_marked_avg_hops;
+    Stats::Scalar m_marked_total_hops;
 
     Stats::Formula m_avg_packet_vnet_latency;
     Stats::Formula m_avg_packet_vqueue_latency;

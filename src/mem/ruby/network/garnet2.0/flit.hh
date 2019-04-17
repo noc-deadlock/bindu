@@ -49,7 +49,7 @@ class flit
   public:
     flit() {}
     flit(int id, int vc, int vnet, RouteInfo route, int size,
-         MsgPtr msg_ptr, Cycles curTime);
+         MsgPtr msg_ptr, Cycles curTime, bool marked = false);
 
     int get_outport() {return m_outport; }
     int get_size() { return m_size; }
@@ -103,6 +103,7 @@ class flit
     }
 
     bool functionalWrite(Packet *pkt);
+    bool m_marked;
 
   protected:
     int m_id;
