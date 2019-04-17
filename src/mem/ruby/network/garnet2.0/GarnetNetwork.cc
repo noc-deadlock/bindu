@@ -96,6 +96,8 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     marked_flit_latency = Cycles(0);
     marked_flit_network_latency = Cycles(0);
     marked_flit_queueing_latency = Cycles(0);
+    rand_bb = p->rand_bb;
+
     sim_type = p->sim_type;
     cout << "sim-type: " << sim_type << endl;
     // these should be later configured using command-line.
@@ -166,7 +168,18 @@ GarnetNetwork::init_brownian_bubbles() {
     // initialize brownian bubbles here:
     for (int k=0; k < m_num_bubble; k++) {
         bubble.at(k).bubble_id = k;
-        bubble.at(k).router_id = k % (m_routers.size());
+        if (rand_bb == 1) {
+            try_again:
+            bubble.at(k).router_id = random() % (m_routers.size());
+            // so that no two bubbles get same router-ids
+            for(int ii = 0; ii < k; ii++) {
+                if (bubble.at(ii).router_id == bubble.at(k).router_id)
+                    goto try_again;
+            }
+        } else {
+            bubble.at(k).router_id = k % (m_routers.size());
+        }
+        cout << "bubble-router_id: " << bubble.at(k).router_id << endl;
         // initializie the sense of movement to be increaseing for all the
         // brownian-bubbles
         bubble.at(k).sense_inc = true;

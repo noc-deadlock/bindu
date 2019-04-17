@@ -352,6 +352,7 @@ class GarnetNetwork : public Network
     Cycles marked_flit_network_latency;
     Cycles marked_flit_queueing_latency;
 
+    int rand_bb;
 
   protected:
     Stats::Vector m_marked_flt_dist;

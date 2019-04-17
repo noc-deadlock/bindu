@@ -79,3 +79,5 @@ working command-line:
 ------
 ./build/RISCV_MESI_Two_Level/gem5.debug --remote-gdb-port=0 configs/example/se.py --cpu-type TimingSimpleCPU --num-cpus=64 --l1d_size=16kB --l1i_size=16kB --l1d_assoc=4 --num-l2caches=64 --l2_size=128kB --l2_assoc=8 --num-dirs=4 --ruby --mem-size=4096MB --network=garnet2.0 --topology=Mesh_XY --mesh-rows=8 --vcs-per-vnet=2 --enable-bn=1 --num-bubble=1 --inter-period=100 --intra-period=1000 --routing-algorithm=2 -c my_benchmarks/ligra/bin/riscv/BFS -o '-n 64 my_benchmarks/ligra/input/rMatGraph_J_5_100'
 ---------
+[ new sample command.. (most performant) ]
+./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=Mesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=10000 --inj-vnet=0 --vcs-per-vnet=2 --sim-type=1 --enable-bn=1 --num-bubble=4 --inter-period=1 --intra-period=1 --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=2

@@ -97,6 +97,9 @@ def define_options(parser):
                       help="number of marked flits injected into the network\
                       marked packets would be just /k where ther are k-flits\
                       per packet")
+    parser.add_option("--rand-bb", action="store",
+                    type="int", default=0,
+                    help="if set brownian bubbles will be injected at random routers")
 
 def create_network(options, ruby):
 
@@ -137,6 +140,7 @@ def init_network(options, network, InterfaceClass):
         network.sim_type = options.sim_type
         network.warmup_cycles = options.warmup_cycles
         network.marked_flits = options.marked_flits
+        network.rand_bb = options.rand_bb
 
     if options.network == "simple":
         network.setup_buffers()
