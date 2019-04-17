@@ -70,13 +70,22 @@ class RoutingUnit
     int outportComputeRandom(RouteInfo route,
                          int inport,
                          PortDirection inport_dirn);
+    int outportComputeAdaptRand(RouteInfo route,
+                            int inport,
+                            PortDirection inport_dirn);
+    int outportComputeWestFirst(RouteInfo route,
+                            int inport,
+                            PortDirection inport_dirn);
+    int outportComputeAdaptWestFirst(RouteInfo route,
+                            int inport,
+                            PortDirection inport_dirn);
 
     // Custom Routing Algorithm using Port Directions
     int outportComputeCustom(RouteInfo route,
                              int inport,
                              PortDirection inport_dirn);
 
-    const std::map<PortDirection, int>& get_inports_dirn2idx()   {
+    std::map<PortDirection, int>& get_inports_dirn2idx()   {
         return m_inports_dirn2idx;
     }
     const std::map<int, PortDirection>& get_inports_idx2dirn()   {

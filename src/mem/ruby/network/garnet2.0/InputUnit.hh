@@ -167,6 +167,19 @@ class InputUnit : public Consumer
         return m_in_link;
     }
 
+  inline int
+  get_numFreeVC(PortDirection dirn_) {
+     assert(dirn_ == m_direction);
+     int freeVC = 0;
+     // since we always use vnet=0
+     for (int vc_=0; vc_ < m_vc_per_vnet; ++vc_) {
+          if(m_vcs[vc_]->isEmpty() == true)
+             freeVC++;
+     }
+     return freeVC;
+  }
+
+
   private:
     int m_id;
     PortDirection m_direction;

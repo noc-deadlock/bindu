@@ -145,6 +145,16 @@ Router::wakeup()
     m_switch->wakeup();
 }
 
+int
+Router::get_numFreeVC(PortDirection dirn_) {
+    // Caution: This 'dirn_' is the direction of inport
+    // of downstream router...
+    assert(dirn_ != "Local");
+    int inport_id = m_routing_unit->get_inports_dirn2idx()[dirn_];
+    return (m_input_unit[inport_id]->get_numFreeVC(dirn_));
+}
+
+
 void
 Router::addInPort(PortDirection inport_dirn,
                   NetworkLink *in_link, CreditLink *credit_link)

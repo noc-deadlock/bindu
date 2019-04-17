@@ -420,10 +420,10 @@ AbstractMemory::access(PacketPtr pkt)
 void
 AbstractMemory::functionalAccess(PacketPtr pkt)
 {
-	/*
+    /*
     assert(AddrRange(pkt->getAddr(),
                      pkt->getAddr() + pkt->getSize() - 1).isSubset(range));
-	*/
+    */
     uint8_t *hostAddr = pmemAddr + pkt->getAddr() - range.start();
 
     if (pkt->isRead()) {

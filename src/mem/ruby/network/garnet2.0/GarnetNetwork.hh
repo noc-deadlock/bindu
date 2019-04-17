@@ -41,6 +41,7 @@
 #include "mem/ruby/network/fault_model/FaultModel.hh"
 #include "mem/ruby/network/garnet2.0/CommonTypes.hh"
 #include "params/GarnetNetwork.hh"
+using namespace std;
 
 class FaultModel;
 class NetworkInterface;
@@ -109,7 +110,14 @@ class GarnetNetwork : public Network
 
     // increment counters
     void increment_injected_packets(int vnet) { m_packets_injected[vnet]++; }
-    void increment_received_packets(int vnet) { m_packets_received[vnet]++; }
+    void increment_received_packets(int vnet) {
+        m_packets_received[vnet]++;
+        cout << "m_total_packets_received: " << m_total_packets_received++ << endl;
+    }
+
+    Router*
+    get_RouterInDirn(PortDirection outport_dir, int upstream_id);
+
 
     void
     increment_packet_network_latency(Cycles latency, int vnet)
@@ -159,6 +167,7 @@ class GarnetNetwork : public Network
     uint32_t m_inter_bubble_period;
     Cycles last_inter_bubble_movement;
     Cycles last_intra_bubble_movement;
+    uint64_t m_total_packets_received;
 
     struct brownian_bubble {
         uint32_t bubble_id;
@@ -176,7 +185,6 @@ class GarnetNetwork : public Network
     };
 
     std::vector<brownian_bubble> bubble;
-
   protected:
     // Configuration
     int m_num_rows;
@@ -189,6 +197,17 @@ class GarnetNetwork : public Network
     bool m_enable_fault_model;
 
     // Statistical variables
+
+    // statistical variable (~public~ :P)
+    // Brownian Network Related
+    Stats::Scalar m_num_inter_swap;
+    Stats::Scalar m_num_intra_swap;
+    Stats::Scalar m_inter_swap_bubble;
+    Stats::Scalar m_intra_swap_bubble;
+    Stats::Scalar m_intra_swap_pkt;
+    Stats::Scalar m_inter_swap_pkt;
+
+
     Stats::Vector m_packets_received;
     Stats::Vector m_packets_injected;
     Stats::Vector m_packet_network_latency;

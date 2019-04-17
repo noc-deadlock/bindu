@@ -81,6 +81,7 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     cout << "m_inter_bubble_period: " << m_inter_bubble_period << endl;
     last_inter_bubble_movement = Cycles(0);
     last_intra_bubble_movement = Cycles(0);
+    m_total_packets_received = 0;
     // these should be later configured using command-line.
     // for now hard-codding them
 
@@ -299,6 +300,9 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     assert(bubble[id].inport_dirn != "Local");
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
+                    // update the stats here...
+                    m_num_intra_swap++;
+                    m_intra_swap_bubble++;
                     // schedule wakeup for this router at next inter-bubble-period.
                     /*
                     if (curCycle() > Cycles(m_inter_bubble_period)) {
@@ -323,6 +327,9 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     assert(bubble[id].inport_dirn != "Local");
                     bubble[id].last_intra_movement_cycle = curCycle();
                     moved_ = true;
+                    // update stats here:
+                    m_num_intra_swap++;
+                    m_intra_swap_pkt++;
                     break;
                 }
                 else {
@@ -412,6 +419,9 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 assert(bubble[bubble_id].inport_dirn != "Local");
                 bubble[bubble_id].last_inter_movement_cycle = curCycle();
                 moved_ = true;
+                // Update stats here:
+                m_num_inter_swap++;
+                m_inter_swap_bubble++;
                 break;
             }
 
@@ -443,6 +453,8 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 assert(bubble[bubble_id].inport_dirn != "Local");
                 bubble[bubble_id].last_inter_movement_cycle = curCycle();
                 moved_ = true;
+                m_num_inter_swap++;
+                m_inter_swap_pkt++;
                 break;
             }
         }
@@ -552,6 +564,66 @@ GarnetNetwork::print_brownian_bubbles() {
         cout << endl;
     }
 }
+
+Router*
+GarnetNetwork::get_RouterInDirn( PortDirection outport_dir, int my_id )
+{
+    int num_cols = getNumCols();
+    int downstream_id = -1; // router_id for downstream router
+//    cout << "GarnetNetwork::get_RouterInDirn: outport_dir: " << outport_dir << endl;
+//    cout << "GarnetNetwork::get_RouterInDirn: my_id: " << my_id << endl;
+    // Do border control check here...
+
+    /*outport direction fromt he flit for this router*/
+    if (outport_dir == "East") {
+        downstream_id = my_id + 1;
+        // constraints on downstream router-id
+        for(int k=(num_cols-1); k < getNumRouters(); k+=num_cols ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "West") {
+        downstream_id = my_id - 1;
+        // constraints on downstream router-id
+        for(int k=0; k < getNumRouters(); k+=num_cols ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "North") {
+        downstream_id = my_id + num_cols;
+        // constraints on downstream router-id
+        for(int k=((num_cols-1)*num_cols); k < getNumRouters(); k+=1 ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "South") {
+        downstream_id = my_id - num_cols;
+        // constraints on downstream router-id
+        for(int k=0; k < num_cols; k+=1 ) {
+            assert(my_id != k);
+        }
+    }
+    else if (outport_dir == "Local"){
+        assert(0);
+        return NULL;
+    }
+    else {
+        assert(0); // for completion of if-else chain
+        return NULL;
+    }
+
+//    cout << "GarnetNetwork::get_RouterInDirn: downstream_id: " << downstream_id << endl;
+//    cout << "GarnetNetwork::get_RouterInDirn: my_id: " << my_id << endl;
+//    cout << "----------------" << endl;
+
+    if ((downstream_id < 0) || (downstream_id >= getNumRouters())) {
+        assert(0);
+        return NULL;
+    } else
+        return m_routers[downstream_id];
+//    return downstream_id;
+}
+
 
 void
 GarnetNetwork::init()
@@ -737,6 +809,19 @@ void
 GarnetNetwork::regStats()
 {
     Network::regStats();
+
+    m_num_inter_swap
+        .name(name() + ".total_inter_swap");
+    m_num_intra_swap
+        .name(name() + ".total_intra_swap");
+    m_inter_swap_bubble
+        .name(name() + ".inter_bubble_swap");
+    m_intra_swap_bubble
+        .name(name() + ".intra_bubble_swap");
+    m_inter_swap_pkt
+        .name(name() + ".inter_swap_pkt");
+    m_intra_swap_pkt
+        .name(name() + ".intra_swap_pkt");
 
     // Packets
     m_packets_received
