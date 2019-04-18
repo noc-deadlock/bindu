@@ -57,7 +57,7 @@ class irregularMesh_XY(SimpleTopology):
         # Can be over-ridden on a per link/router basis
         link_latency = options.link_latency # used by simple and garnet
         router_latency = options.router_latency # only used by garnet
-        marked_flt = options.marked_flt_per_node # number of marked flits
+        # marked_flt = options.marked_flt_per_node # number of marked flits
 
 
         # There must be an evenly divisible number of cntrls to routers
@@ -68,7 +68,7 @@ class irregularMesh_XY(SimpleTopology):
         assert(num_columns * num_rows == num_routers)
 
         # Create the routers in the mesh
-        routers = [Router(router_id=i, latency = router_latency, marked_flit = marked_flt) \
+        routers = [Router(router_id=i, latency = router_latency) \
             for i in range(num_routers)]
         network.routers = routers
 

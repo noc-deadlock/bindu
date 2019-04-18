@@ -169,7 +169,8 @@ class GarnetNetwork : public Network
             m_marked_pkt_received[vnet]++;
         }
         m_packets_received[vnet]++;
-        cout << "m_total_packets_received: " << m_total_packets_received++ << endl;
+        cout << "m_total_packets_received: " << m_total_packets_received++ \
+           << " at cycle: "<< curCycle() << endl;
     }
 
     Router*
