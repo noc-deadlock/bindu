@@ -106,6 +106,7 @@ Router::wakeup()
         if (m_network_ptr->last_intra_bubble_movement < curCycle()) {
             for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
                 m_network_ptr->move_intra_bubble(id);
+                assert(m_network_ptr->bubble[id].inport_dirn != "Local");
             }
             m_network_ptr->last_intra_bubble_movement = Cycles(uint64_t(curCycle()) + \
                 uint64_t(m_network_ptr->m_intra_bubble_period));
@@ -118,6 +119,7 @@ Router::wakeup()
         if (m_network_ptr->last_inter_bubble_movement < curCycle()) {
             for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
                 m_network_ptr->move_inter_bubble(id);
+                assert(m_network_ptr->bubble[id].inport_dirn != "Local");
             }
             m_network_ptr->last_inter_bubble_movement = Cycles(uint64_t(curCycle()) + \
                        uint64_t(m_network_ptr->m_inter_bubble_period));

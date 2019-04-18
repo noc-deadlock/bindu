@@ -260,10 +260,12 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
             // as there can be multiple bubble sitting within a router
             // scan through all brownian-bubbles:
             for (int bb=0; bb < bubble.size(); bb++) {
-                if ((id != bubble[bb].bubble_id) &&
-                    (bubble[bb].router_id == bubble[id].router_id) &&
-                    (bubble[bb].inport_id == inpUnit->get_id())) {
-                    try_next = true;
+                if (id != bubble[bb].bubble_id) {
+                    if ((bubble[bb].router_id == bubble[id].router_id) &&
+                        (bubble[bb].inport_id == inpUnit->get_id())) {
+                        try_next = true;
+                        break;
+                    }
                 }
             }
             if (try_next)
@@ -333,12 +335,12 @@ GarnetNetwork::move_intra_bubble(int bubble_id) {
                     m_num_intra_swap++;
                     m_intra_swap_bubble++;
                     // schedule wakeup for this router at next inter-bubble-period.
-                    /*
+
                     if (curCycle() > Cycles(m_inter_bubble_period)) {
                         m_routers[router_id]->\
                         schedule_wakeup( Cycles(m_inter_bubble_period) - \
                         Cycles( uint64_t(curCycle()) % m_inter_bubble_period));
-                    }*/
+                    }
                     break;
                 }
                 //exchange with a packet.. no credit management is needed.
@@ -456,6 +458,11 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
 
             // Case II: if the vc-0 is empty and a brownian bubble as well.
             // then don't do anything here...
+            else if ((inpUnit->vc_isEmpty(0) == true) &&
+                    (upstream_op_->is_vc_idle(0, curCycle()) == false)) {
+                // try any other input port
+                continue; // easy fix for now
+            }
             // Case III: if vc-0 has a packet sitting.
             else if ((inpUnit->vc_isEmpty(0) == false) &&
                     (upstream_op_->is_vc_idle(0, curCycle()) == false)) {
