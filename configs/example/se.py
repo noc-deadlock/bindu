@@ -66,6 +66,7 @@ from common import BPConfig
 from common import MemConfig
 from common.Caches import *
 from common.cpu2000 import *
+from common.cores.arm import O3_ARM_v7a_3
 
 def get_processes(options):
     """Interprets provided options and returns a list of processes"""
@@ -122,6 +123,10 @@ parser = optparse.OptionParser()
 Options.addCommonOptions(parser)
 Options.addSEOptions(parser)
 
+parser.add_option("--sim-type", type="int", default=1,
+                  help="to run the garnet simulation in default mode\
+                  or run it in warm-up -- cool-down mode.")
+
 if '--ruby' in sys.argv:
     Ruby.define_options(parser)
 
@@ -163,7 +168,8 @@ else:
     print("No workload specified. Exiting!\n", file=sys.stderr)
     sys.exit(1)
 
-
+# set CPUClass here for the O3_ARM_v7a_3
+CPUClass =
 (CPUClass, test_mem_mode, FutureClass) = Simulation.setCPUClass(options)
 CPUClass.numThreads = numThreads
 
