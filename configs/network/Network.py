@@ -103,6 +103,10 @@ def define_options(parser):
     parser.add_option("--conf-file", type="string",
                   default="64_nodes-connectivity_matrix_0-links_removed_0.txt",
                   help="check configs/topologies for complete set")
+    parser.add_option("--scheme", type="string",
+                  default="bn",
+                  help="to simulate critical bubble scheme or brownian-network,\
+                  currently not fully supported.")
 
 
 def create_network(options, ruby):
@@ -145,6 +149,7 @@ def init_network(options, network, InterfaceClass):
         network.warmup_cycles = options.warmup_cycles
         network.marked_flits = options.marked_flits
         network.rand_bb = options.rand_bb
+        network.scheme = options.scheme
 
     if options.network == "simple":
         network.setup_buffers()

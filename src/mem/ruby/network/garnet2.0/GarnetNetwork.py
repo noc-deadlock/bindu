@@ -61,6 +61,8 @@ class GarnetNetwork(RubyNetwork):
                             "number of cycles when bubble will shuffle within the router")
     rand_bb = Param.UInt32(Parent.rand_bb,
                         "if set brownian bubbles will be initialized at random routers")
+    scheme = Param.String(Parent.scheme, "to simulate critical bubble scheme or "\
+                            "brownian-network, currently not fully supported.")
 
 class GarnetNetworkInterface(ClockedObject):
     type = 'GarnetNetworkInterface'

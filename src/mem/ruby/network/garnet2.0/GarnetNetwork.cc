@@ -97,7 +97,9 @@ GarnetNetwork::GarnetNetwork(const Params *p)
     marked_flit_network_latency = Cycles(0);
     marked_flit_queueing_latency = Cycles(0);
     rand_bb = p->rand_bb;
-
+    m_scheme = p->scheme;
+    cout << "m_scheme: " << m_scheme << endl;
+//    assert(0);
     sim_type = p->sim_type;
     cout << "sim-type: " << sim_type << endl;
     // these should be later configured using command-line.

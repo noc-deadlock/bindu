@@ -301,6 +301,7 @@ class GarnetNetwork : public Network
 
     void print_brownian_bubbles();
     void init_brownian_bubbles();
+    void init_brownian_bubbles_cbs();
     void print_topology();
     bool move_intra_bubble(int bubble_id);
     bool move_inter_bubble(int bubble_id);
@@ -315,6 +316,7 @@ class GarnetNetwork : public Network
     Cycles last_inter_bubble_movement;
     Cycles last_intra_bubble_movement;
     uint64_t m_total_packets_received;
+    string m_scheme;
 
     struct brownian_bubble {
         uint32_t bubble_id;

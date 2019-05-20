@@ -97,7 +97,12 @@ Router::wakeup()
         if (m_network_ptr->m_bubble_init == false) {
             // this is the very first wake-up of the router in the
             // whole network.
-            m_network_ptr->init_brownian_bubbles();
+            if (m_network_ptr->m_scheme == "bn")
+                m_network_ptr->init_brownian_bubbles();
+            else if (m_network_ptr->m_scheme == "cbs")
+                m_network_ptr->init_brownian_bubbles_cbs();
+            else
+                assert(0);
         }
     }
 

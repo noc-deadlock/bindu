@@ -105,8 +105,8 @@ class OutputUnit : public Consumer
     }
     int get_id() { return m_id; }
 
-  int getNumFreeVCs(int vnet)
-  {
+    int getNumFreeVCs(int vnet)
+    {
       int freeVC = 0;
       int vc_base = vnet*m_vc_per_vnet;
       for (int vc = vc_base; vc < vc_base + m_vc_per_vnet; vc++) {
@@ -115,7 +115,7 @@ class OutputUnit : public Consumer
       }
       return freeVC;
 
-  }
+    }
 
 
   private:

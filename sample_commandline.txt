@@ -93,3 +93,8 @@ introduced new option (--rand-bb)
 command-line for irregular topologies:
 ==========
 ./build/Garnet_standalone/gem5.debug configs/example/garnet_synth_traffic.py --topology=irregularMesh_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=10000 --inj-vnet=0 --vcs-per-vnet=2 --conf-file=64_nodes-connectivity_matrix_0-links_removed_12.txt --sim-type=2 --enable-bn=1 --rand-bb=1 --num-bubble=4 --inter-period=1 --intra-period=1 --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=0
+
+-------------------
+Adding a new scheme:
+-------------------
+./build/Garnet_standalone/gem5.opt configs/example/garnet_synth_traffic.py --topology=Torus_XY --num-cpus=64 --num-dirs=64 --mesh-rows=8 --network=garnet2.0 --router-latency=1 --sim-cycles=10000 --inj-vnet=0 --vcs-per-vnet=2 --conf-file=64_nodes-connectivity_matrix_0-links_removed_0.txt --sim-type=1 --enable-bn=1 --rand-bb=1 --num-bubble=4 --inter-period=1 --intra-period=1 --scheme=cbs --injectionrate=0.20 --synthetic=uniform_random --routing-algorithm=0
