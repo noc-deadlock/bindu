@@ -304,10 +304,13 @@ class GarnetNetwork : public Network
     void print_brownian_bubbles();
     void init_brownian_bubbles();
     void init_brownian_bubbles_cbs();
+    void set_bubble_inport(int k, string dirn_);
     void print_topology();
     bool move_intra_bubble(int bubble_id);
     bool move_inter_bubble(int bubble_id);
+    bool move_inter_bubble_cbs(int bubble_id);
     int move_next_router(int curr_router_id, int bubble_id );
+    int move_next_router_cbs(int curr_router_id, int bubble_id);
 
 
     uint32_t m_enable_bn;

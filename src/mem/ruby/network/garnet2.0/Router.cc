@@ -97,10 +97,13 @@ Router::wakeup()
         if (m_network_ptr->m_bubble_init == false) {
             // this is the very first wake-up of the router in the
             // whole network.
-            if (m_network_ptr->m_scheme == "bn")
+            if (m_network_ptr->m_scheme == "bn") {
                 m_network_ptr->init_brownian_bubbles();
-            else if (m_network_ptr->m_scheme == "cbs")
+            }
+            else if (m_network_ptr->m_scheme == "cbs") {
                 m_network_ptr->init_brownian_bubbles_cbs();
+                // assert(0);
+            }
             else
                 assert(0);
         }
@@ -110,8 +113,10 @@ Router::wakeup()
     if (m_network_ptr->m_enable_bn == 1) {
         if (m_network_ptr->last_intra_bubble_movement < curCycle()) {
             for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
-                m_network_ptr->move_intra_bubble(id);
-                assert(m_network_ptr->bubble[id].inport_dirn != "Local");
+                if (m_network_ptr->m_scheme == "bn") {
+                    m_network_ptr->move_intra_bubble(id);
+                    assert(m_network_ptr->bubble[id].inport_dirn != "Local");
+                }
             }
             m_network_ptr->last_intra_bubble_movement = Cycles(uint64_t(curCycle()) + \
                 uint64_t(m_network_ptr->m_intra_bubble_period));
@@ -123,8 +128,14 @@ Router::wakeup()
         // Only one router would do it and will move bubble only once
         if (m_network_ptr->last_inter_bubble_movement < curCycle()) {
             for (int id = 0; id < m_network_ptr->bubble.size(); id++) {
-                m_network_ptr->move_inter_bubble(id);
-                assert(m_network_ptr->bubble[id].inport_dirn != "Local");
+                if (m_network_ptr->m_scheme == "bn") {
+                    m_network_ptr->move_inter_bubble(id);
+                    assert(m_network_ptr->bubble[id].inport_dirn != "Local");
+                }
+                else if (m_network_ptr->m_scheme == "cbs") {
+                    m_network_ptr->move_inter_bubble_cbs(id);
+                    assert(m_network_ptr->bubble[id].inport_dirn != "Local");
+                }
             }
             m_network_ptr->last_inter_bubble_movement = Cycles(uint64_t(curCycle()) + \
                        uint64_t(m_network_ptr->m_inter_bubble_period));
