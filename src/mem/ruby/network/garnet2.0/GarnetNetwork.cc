@@ -532,6 +532,10 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 orig_upstream_op_->increment_credit(0);
                 orig_upstream_op_->set_vc_state(IDLE_, 0, curCycle());
                 orig_inpUnit->set_vc_idle(0, curCycle());
+                Router* orig_router = m_routers[bubble[bubble_id].router_id];
+                orig_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+                nxt_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+
 
                 // update the bubble and break...
                 bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
@@ -561,6 +565,7 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 flit* t_flit = inpUnit->peekTopFlit(0);
                 if (t_flit->get_outport_dirn() == "Local")
                     continue;
+                // set flit time here:
                 t_flit = inpUnit->getTopFlit(0);
                 // re-compute the route from orig router and add it to this flit
                 Router* orig_router = m_routers[bubble[bubble_id].router_id];
@@ -569,8 +574,12 @@ GarnetNetwork::move_inter_bubble(int bubble_id) {
                 t_flit->set_outport(outport);
                 PortDirection out_dirn = orig_router->getOutportDirection(outport);
                 t_flit->set_outport_dirn(out_dirn);
+                t_flit->set_time(curCycle() + Cycles(2));
                 // insert the flit at the location pointed out by the bubble
                 orig_inpUnit->insertFlit(0, t_flit);
+                orig_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+                nxt_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+
                 // no credit management needed.
                 // update the bubble and break.
                 bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
@@ -671,6 +680,9 @@ GarnetNetwork::move_inter_bubble_cbs(int bubble_id) {
                 orig_upstream_op_->increment_credit(0);
                 orig_upstream_op_->set_vc_state(IDLE_, 0, curCycle());
                 orig_inpUnit->set_vc_idle(0, curCycle());
+                Router* orig_router = m_routers[bubble[bubble_id].router_id];
+                orig_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+                nxt_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
 
                 // update the bubble and break...
                 bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
@@ -708,8 +720,11 @@ GarnetNetwork::move_inter_bubble_cbs(int bubble_id) {
                 t_flit->set_outport(outport);
                 PortDirection out_dirn = orig_router->getOutportDirection(outport);
                 t_flit->set_outport_dirn(out_dirn);
+                t_flit->set_time(curCycle() + Cycles(2));
                 // insert the flit at the location pointed out by the bubble
                 orig_inpUnit->insertFlit(0, t_flit);
+                orig_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
+                nxt_router->schedule_wakeup(Cycles(2)); // 2 cycles from now.
                 // no credit management needed.
                 // update the bubble and break.
                 bubble[bubble_id].last_inport_id = bubble[bubble_id].inport_id;
