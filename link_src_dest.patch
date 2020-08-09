@@ -1,0 +1,136 @@
+diff --git a/src/mem/ruby/network/garnet2.0/GarnetNetwork.cc b/src/mem/ruby/network/garnet2.0/GarnetNetwork.cc
+index c0a6e62..fae79b1 100644
+--- a/src/mem/ruby/network/garnet2.0/GarnetNetwork.cc
++++ b/src/mem/ruby/network/garnet2.0/GarnetNetwork.cc
+@@ -227,7 +227,7 @@ GarnetNetwork::makeInternalLink(SwitchID src, SwitchID dest, BasicLink* link,
+     NetworkLink* net_link = garnet_link->m_network_link;
+     net_link->setType(INT_);
+     CreditLink* credit_link = garnet_link->m_credit_link;
+-
++    net_link->set_link_src_dest(src, dest);
+     m_networklinks.push_back(net_link);
+     m_creditlinks.push_back(credit_link);
+ 
+diff --git a/src/mem/ruby/network/garnet2.0/InputUnit.hh b/src/mem/ruby/network/garnet2.0/InputUnit.hh
+index c2cbd58..7f1d5b1 100644
+--- a/src/mem/ruby/network/garnet2.0/InputUnit.hh
++++ b/src/mem/ruby/network/garnet2.0/InputUnit.hh
+@@ -148,17 +148,27 @@ class InputUnit : public Consumer
+     uint32_t functionalWrite(Packet *pkt);
+     void resetStats();
+ 
++    void set_src_router(int src) {
++        m_src_router = src;
++    }
++
++    int get_src_router() {
++        return m_src_router;
++    }
++
+   private:
+     int m_id;
+     PortDirection m_direction;
+     int m_num_vcs;
+     int m_vc_per_vnet;
++    int m_src_router;
+ 
+     Router *m_router;
+     NetworkLink *m_in_link;
+     CreditLink *m_credit_link;
+     flitBuffer *creditQueue;
+ 
++
+     // Input Virtual channels
+     std::vector<VirtualChannel *> m_vcs;
+ 
+diff --git a/src/mem/ruby/network/garnet2.0/NetworkLink.cc b/src/mem/ruby/network/garnet2.0/NetworkLink.cc
+index e718fb8..1282202 100644
+--- a/src/mem/ruby/network/garnet2.0/NetworkLink.cc
++++ b/src/mem/ruby/network/garnet2.0/NetworkLink.cc
+@@ -43,6 +43,8 @@ NetworkLink::NetworkLink(const Params *p)
+       link_srcQueue(nullptr), m_link_utilized(0),
+       m_vc_load(p->vcs_per_vnet * p->virt_nets)
+ {
++    m_link_dest = -1;
++    m_link_src = -1;
+ }
+ 
+ NetworkLink::~NetworkLink()
+diff --git a/src/mem/ruby/network/garnet2.0/NetworkLink.hh b/src/mem/ruby/network/garnet2.0/NetworkLink.hh
+index 98fb7b9..efb19ba 100644
+--- a/src/mem/ruby/network/garnet2.0/NetworkLink.hh
++++ b/src/mem/ruby/network/garnet2.0/NetworkLink.hh
+@@ -72,10 +72,24 @@ class NetworkLink : public ClockedObject, public Consumer
+     uint32_t functionalWrite(Packet *);
+     void resetStats();
+ 
++    inline int get_link_src() {
++        return m_link_src;
++    }
++
++    inline int get_link_dest() {
++        return m_link_dest;
++    }
++    inline void set_link_src_dest(int src, int dest) {
++       m_link_src = src;
++       m_link_dest = dest;
++    }
++
+   private:
+     const int m_id;
+     link_type m_type;
+     const Cycles m_latency;
++    int m_link_src;
++    int m_link_dest;
+ 
+     flitBuffer *linkBuffer;
+     Consumer *link_consumer;
+diff --git a/src/mem/ruby/network/garnet2.0/OutputUnit.hh b/src/mem/ruby/network/garnet2.0/OutputUnit.hh
+index fba8343..65f07cc 100644
+--- a/src/mem/ruby/network/garnet2.0/OutputUnit.hh
++++ b/src/mem/ruby/network/garnet2.0/OutputUnit.hh
+@@ -96,11 +96,24 @@ class OutputUnit : public Consumer
+ 
+     uint32_t functionalWrite(Packet *pkt);
+ 
++    void set_dest_router(int dest) {
++        m_dest_router = dest;
++    }
++
++    int get_dest_router() {
++        return m_dest_router;
++    }
++
++
++    int get_id() { return m_id; }
++
+   private:
+     int m_id;
+     PortDirection m_direction;
+     int m_num_vcs;
+     int m_vc_per_vnet;
++    int m_dest_router;
++
+     Router *m_router;
+     NetworkLink *m_out_link;
+     CreditLink *m_credit_link;
+diff --git a/src/mem/ruby/network/garnet2.0/Router.cc b/src/mem/ruby/network/garnet2.0/Router.cc
+index c753dd0..44898ee 100644
+--- a/src/mem/ruby/network/garnet2.0/Router.cc
++++ b/src/mem/ruby/network/garnet2.0/Router.cc
+@@ -115,6 +115,7 @@ Router::addInPort(PortDirection inport_dirn,
+     int port_num = m_input_unit.size();
+     InputUnit *input_unit = new InputUnit(port_num, inport_dirn, this);
+ 
++    input_unit->set_src_router(in_link->get_link_src());
+     input_unit->set_in_link(in_link);
+     input_unit->set_credit_link(credit_link);
+     in_link->setLinkConsumer(this);
+@@ -134,6 +135,7 @@ Router::addOutPort(PortDirection outport_dirn,
+     int port_num = m_output_unit.size();
+     OutputUnit *output_unit = new OutputUnit(port_num, outport_dirn, this);
+ 
++    output_unit->set_dest_router(out_link->get_link_dest());
+     output_unit->set_out_link(out_link);
+     output_unit->set_credit_link(credit_link);
+     credit_link->setLinkConsumer(this);
