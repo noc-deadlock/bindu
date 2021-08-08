@@ -1,6 +1,6 @@
 # README #
 
-gem5 code repositories for DRAIN: Deadlock Removal for Arbitrary Irregular Networks
+gem5 code repositories for BINDU: Deadlock-Freedom with One Bubble in the Network
 
 ### Design Description ###
 Section-3 of the paper describes the design
